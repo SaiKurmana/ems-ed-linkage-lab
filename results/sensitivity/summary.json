@@ -1,0 +1,108 @@
+{
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "note": "Baseline is the main result. Scenarios are illustrative ASSUMPTIONS.",
+  "scenarios": {
+    "baseline": {
+      "assumption": "Same pass rates for every agency (config: patterns.*).",
+      "label": "Baseline (main result): carry failures random with respect to patient and agency",
+      "overrides": {},
+      "recall": {
+        "det_A": {
+          "all": 0.82993,
+          "rural": 0.833736,
+          "urban": 0.82765,
+          "urban_minus_rural_pp": -0.61
+        },
+        "det_B": {
+          "all": 0.745025,
+          "rural": 0.74474,
+          "urban": 0.745195,
+          "urban_minus_rural_pp": 0.05
+        },
+        "det_C": {
+          "all": 0.917033,
+          "rural": 0.918248,
+          "urban": 0.916305,
+          "urban_minus_rural_pp": -0.19
+        },
+        "hybrid_C": {
+          "all": 0.990954,
+          "rural": 0.989652,
+          "urban": 0.991734,
+          "urban_minus_rural_pp": 0.21
+        },
+        "splink_time": {
+          "all": 0.888989,
+          "rural": 0.889272,
+          "urban": 0.88882,
+          "urban_minus_rural_pp": -0.05
+        }
+      }
+    },
+    "rural_small_agency_carry_gap": {
+      "assumption": "ASSUMPTION for illustration only: agencies in rural counties (the simulation's stand-in for small agencies) are less often connected and have less reliable interfaces. Urban agencies keep the baseline rates. Rates are invented, not estimates.",
+      "label": "Sensitivity: UUID carry fails more often for rural / small agencies",
+      "overrides": {
+        "patterns": {
+          "A_point_to_point": {
+            "stratum_overrides": {
+              "rural": {
+                "interface_live": 0.65,
+                "message_delivered": 0.93,
+                "registration_merge": 0.88
+              }
+            }
+          },
+          "B_hie": {
+            "stratum_overrides": {
+              "rural": {
+                "ems_adt_sent": 0.8,
+                "writeback_success": 0.95
+              }
+            }
+          },
+          "C_fhir_api": {
+            "stratum_overrides": {
+              "rural": {
+                "api_call_success": 0.97,
+                "api_enabled": 0.7
+              }
+            }
+          }
+        }
+      },
+      "recall": {
+        "det_A": {
+          "all": 0.718273,
+          "rural": 0.531908,
+          "urban": 0.829924,
+          "urban_minus_rural_pp": 29.8
+        },
+        "det_B": {
+          "all": 0.703541,
+          "rural": 0.625388,
+          "urban": 0.750362,
+          "urban_minus_rural_pp": 12.5
+        },
+        "det_C": {
+          "all": 0.822693,
+          "rural": 0.666092,
+          "urban": 0.916512,
+          "urban_minus_rural_pp": 25.04
+        },
+        "hybrid_C": {
+          "all": 0.980357,
+          "rural": 0.963436,
+          "urban": 0.990494,
+          "urban_minus_rural_pp": 2.71
+        },
+        "splink_time": {
+          "all": 0.888989,
+          "rural": 0.889272,
+          "urban": 0.88882,
+          "urban_minus_rural_pp": -0.05
+        }
+      }
+    }
+  }
+}

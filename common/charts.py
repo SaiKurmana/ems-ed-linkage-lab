@@ -220,3 +220,109 @@ def threshold_sweep(sweep: pd.DataFrame) -> go.Figure:
     fig.update_xaxes(title="Recall", tickformat=".0%")
     fig.update_yaxes(title="Precision", tickformat=".1%")
     return _layout(fig, "Splink precision–recall across match-probability thresholds")
+
+
+# ordinal blue ramp (light steps >= 250, dark steps <= 600) for assumed lags; longer = darker
+LAG_RAMP = ["#86b6ef", "#5598e7", "#1c5cab", "#184f95"]
+URBANICITY_COLOR = {"urban": LIGHT["blue"], "rural": LIGHT["orange"]}
+
+
+def carry_gap_dumbbell(tbl: pd.DataFrame, summary: dict) -> go.Figure:
+    """Urban vs rural recall per method, baseline and each sensitivity scenario (small multiples)."""
+    from plotly.subplots import make_subplots
+
+    scenarios = list(summary)
+    methods = ["det_A", "det_B", "det_C", "hybrid_C", "splink_time"]
+    titles = [
+        "Baseline (main result)"
+        if s == "baseline"
+        else "Sensitivity: rural / small-agency carry gap"
+        if s == "rural_small_agency_carry_gap"
+        else s
+        for s in scenarios
+    ]
+    fig = make_subplots(
+        rows=1,
+        cols=len(scenarios),
+        shared_yaxes=True,
+        subplot_titles=titles,
+        horizontal_spacing=0.06,
+    )
+    labels = [METHOD_SHORT[m] for m in methods]
+    for j, sc in enumerate(scenarios, 1):
+        d = tbl[tbl.scenario == sc]
+        for m, lab in zip(methods, labels, strict=True):
+            u = d[(d.method == m) & (d.urbanicity == "urban")].recall.iloc[0]
+            r = d[(d.method == m) & (d.urbanicity == "rural")].recall.iloc[0]
+            fig.add_scatter(
+                x=[r, u],
+                y=[lab, lab],
+                mode="lines",
+                line={"color": GRID, "width": 3},
+                showlegend=False,
+                hoverinfo="skip",
+                row=1,
+                col=j,
+            )
+        for urb in ("urban", "rural"):
+            dd = d[d.urbanicity == urb].set_index("method").reindex(methods)
+            fig.add_scatter(
+                x=dd.recall,
+                y=labels,
+                mode="markers",
+                name=urb.capitalize(),
+                legendgroup=urb,
+                showlegend=j == 1,
+                marker={
+                    "size": 11,
+                    "color": URBANICITY_COLOR[urb],
+                    "line": {"width": 2, "color": "#fcfcfb"},
+                },
+                customdata=dd.n_true_links,
+                hovertemplate="%{y} · "
+                + urb
+                + "<br>recall %{x:.3f} (n=%{customdata})<extra></extra>",
+                row=1,
+                col=j,
+            )
+    fig.update_xaxes(tickformat=".0%", range=[0.45, 1.02])
+    fig.update_yaxes(autorange="reversed")
+    for a in fig.layout.annotations:
+        a.font = {"size": 13, "color": TEXT_2}
+    return _layout(
+        fig,
+        "Recall by urbanicity: baseline vs rural / small-agency scenario (ASSUMPTION)",
+        height=400,
+    )
+
+
+def latency_sensitivity(ls: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    d = ls[ls.method == "det_C"]
+    fig.add_scatter(
+        x=d.months_since_encounter,
+        y=d.share_of_true_links_available,
+        mode="lines",
+        name="UUID · C (at the encounter)",
+        line={"width": 2, "color": METHOD_COLOR["det_C"], "shape": "hv"},
+        hovertemplate="UUID · C<br>month %{x}: %{y:.1%}<extra></extra>",
+    )
+    lags = sorted(ls.probabilistic_lag_months_after_year_end.dropna().unique())
+    for lag, color in zip(lags, LAG_RAMP, strict=False):
+        d = ls[(ls.method == "splink_time") & (ls.probabilistic_lag_months_after_year_end == lag)]
+        fig.add_scatter(
+            x=d.months_since_encounter,
+            y=d.share_of_true_links_available,
+            mode="lines",
+            name=f"Splink, batch {int(lag)} mo after year end",
+            line={"width": 2, "color": color, "shape": "hv"},
+            hovertemplate=f"Splink, lag {int(lag)} mo" + "<br>month %{x}: %{y:.1%}<extra></extra>",
+        )
+    fig.update_xaxes(title="Months since the encounter", dtick=6)
+    fig.update_yaxes(title="Share of true links available", tickformat=".0%", range=[0, 1.02])
+    return _layout(
+        fig,
+        "Latency sensitivity: assumed probabilistic batch lag 12 / 18 / 24 / 36 months",
+        height=420,
+        hovermode="x unified",
+    )

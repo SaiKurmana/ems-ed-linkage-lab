@@ -17,7 +17,12 @@ import numpy as np
 import pandas as pd
 
 from patterns import hl7v2 as h
-from patterns.common import expected_carry_rate, stage
+from patterns.common import (
+    agency_strata,
+    expected_carry_rate,
+    stage_by_stratum,
+    stratum_rate,
+)
 
 STAGES = ["interface_live", "message_delivered", "registration_merge"]
 
@@ -101,9 +106,12 @@ def run(
     ids = sorted(transported)
     log = {"n_transported": len(ids)}
 
-    live, _ = stage(rng, ids, pc["interface_live"])
+    strata = agency_strata(ems, cfg)
+    live, _ = stage_by_stratum(rng, ids, pc["interface_live"], "interface_live", pc, strata)
     # Build + "send" A05 messages for live interfaces
-    delivered, _ = stage(rng, live, pc["message_delivered"])
+    delivered, _ = stage_by_stratum(
+        rng, live, pc["message_delivered"], "message_delivered", pc, strata
+    )
     # Hospital interface engine parses each delivered message and stores the pre-admit
     pre_admits: dict[str, str] = {}
     for u in delivered:
@@ -111,7 +119,9 @@ def run(
         parsed = h.extract_ems_uuid(msg)
         assert parsed == u
         pre_admits[u] = h.field(msg, "PV1", 3)
-    merged, _ = stage(rng, sorted(pre_admits), pc["registration_merge"])
+    merged, _ = stage_by_stratum(
+        rng, sorted(pre_admits), pc["registration_merge"], "registration_merge", pc, strata
+    )
     log.update(
         {
             "interface_live": len(live),
@@ -133,6 +143,9 @@ def run(
     ed_out["ems_uuid"] = out_uuid
     log["ed_records_with_uuid"] = int(ed_out.ems_uuid.notna().sum())
     log["expected_carry_rate"] = expected_carry_rate([pc[s] for s in STAGES])
+    log["expected_carry_rate_by_agency_urbanicity"] = {
+        u: expected_carry_rate([stratum_rate(pc, u, s) for s in STAGES]) for u in ("rural", "urban")
+    }
     log["observed_carry_rate"] = len(merged) / max(1, len(ids))
 
     # examples: pick the first few carried encounters (sorted, deterministic)

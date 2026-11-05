@@ -24,7 +24,7 @@ import pandas as pd
 
 from common import EMS_UUID_ASSIGNING_AUTHORITY
 from patterns import hl7v2 as h
-from patterns.common import stage
+from patterns.common import agency_strata, stage, stage_by_stratum
 
 ALIAS_NAMES = {"UNKNOWN", "TRAUMA", "DOE"}
 
@@ -186,7 +186,10 @@ def run(
     ed_rows = {r.ed_encounter_id: r for r in ed.itertuples(index=False)}
     log: dict = {"n_ems_records": len(ems_rows), "n_ed_records": len(ed_rows)}
 
-    ems_sent, _ = stage(rng, sorted(ems_rows), pc["ems_adt_sent"])
+    strata = agency_strata(ems, cfg)
+    ems_sent, _ = stage_by_stratum(
+        rng, sorted(ems_rows), pc["ems_adt_sent"], "ems_adt_sent", pc, strata
+    )
     ed_sent, _ = stage(rng, sorted(ed_rows), pc["ed_adt_sent"])
     log.update({"ems_adt_sent": len(ems_sent), "ed_adt_sent": len(ed_sent)})
 
@@ -280,7 +283,11 @@ def run(
             c["received"] for c in on_time if c["uuid"] == scored[0][1]
         )
         used.add(scored[0][1])
-    written, _ = stage(rng, sorted(matches), pc["writeback_success"])
+    # write-back stratified by the matched EMS agency
+    ed_strata = {eid: strata[u] for eid, u in matches.items()}
+    written, _ = stage_by_stratum(
+        rng, sorted(matches), pc["writeback_success"], "writeback_success", pc, ed_strata
+    )
     log.update(
         {
             "hie_matches": len(matches),

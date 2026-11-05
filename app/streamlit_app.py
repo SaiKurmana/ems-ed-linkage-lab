@@ -253,6 +253,34 @@ with tab3:
     st.dataframe(gap.style.format("{:.3f}"), width="stretch")
     st.dataframe(piv.style.format("{:.3f}"), width="stretch")
 
+    st.markdown("#### Does flat UUID recall survive non-random carry failures? (sensitivity)")
+    sens = json.loads((RESULTS / "sensitivity" / "summary.json").read_text(encoding="utf-8"))
+    sc = sens["scenarios"]["rural_small_agency_carry_gap"]
+    st.warning(f"**{sc['label']}.** {sc['assumption']}", icon="⚠️")
+    carry = load_csv("sensitivity/carry_by_urbanicity.csv")
+    plot(charts.carry_gap_dumbbell(carry, sens["scenarios"]))
+    gap_rows = [
+        {
+            "scenario": name,
+            "method": charts.METHOD_SHORT[m],
+            "urban": g["urban"],
+            "rural": g["rural"],
+            "urban − rural (pp)": g["urban_minus_rural_pp"],
+        }
+        for name, v in sens["scenarios"].items()
+        for m, g in v["recall"].items()
+    ]
+    st.dataframe(
+        pd.DataFrame(gap_rows).style.format(
+            {"urban": "{:.3f}", "rural": "{:.3f}", "urban − rural (pp)": "{:+.1f}"}
+        ),
+        hide_index=True,
+        width="stretch",
+    )
+    st.caption(
+        f"{DISCLAIMER} Baseline = main result; the scenario's rural rates are invented for illustration."
+    )
+
 # ----------------------------------------------------------------------------- tab 4
 with tab4:
     summ = json.loads((RESULTS / "analysis" / "summary.json").read_text(encoding="utf-8"))
@@ -274,6 +302,15 @@ with tab4:
         "`config/default.yaml → latency_assumptions`. This is an ASSUMPTION, not a measurement."
     )
     plot(charts.latency(load_csv("latency.csv")))
+    st.markdown("#### Latency sensitivity (illustrative assumption: 12 / 18 / 24 / 36 months)")
+    st.caption(
+        "Probabilistic links are assumed to become available in an annual batch N months after the "
+        "data year closes. No verified public source gives a typical end-to-end EMS–ED linkage lag; "
+        "for context, HCUP reports State databases are released typically beginning 9–12 months after "
+        "the calendar year (see docs/standards_references.md). Synthetic data — for demonstration only."
+    )
+    plot(charts.latency_sensitivity(load_csv("latency_sensitivity.csv")))
+    st.dataframe(load_csv("latency_sensitivity_summary.csv"), hide_index=True, width="stretch")
 
 st.divider()
 st.caption(f"{DISCLAIMER} {AFFILIATION}")

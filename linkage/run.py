@@ -49,6 +49,7 @@ def latency_curve(
     method: str,
     cfg: dict,
     horizon_months: int = 48,
+    prob_lag_months: float | None = None,
 ) -> pd.DataFrame:
     """Share of all true links that are correctly linked AND available for analysis, by months
     since the encounter. Lags are configurable ASSUMPTIONS (config: latency_assumptions)."""
@@ -58,9 +59,12 @@ def latency_curve(
     found = set(zip(pred.ems_uuid, pred.ed_encounter_id, strict=True))
     ok = np.array([(a, b) in found for a, b in zip(t.ems_uuid, t.ed_encounter_id, strict=True)])
     if method.startswith("splink"):
-        avail = pd.Timestamp(year + 1, 1, 1) + pd.DateOffset(
-            months=la["probabilistic_months_after_year_end"]
+        lag = (
+            la["probabilistic_months_after_year_end"]
+            if prob_lag_months is None
+            else prob_lag_months
         )
+        avail = pd.Timestamp(year + 1, 1, 1) + pd.DateOffset(months=int(lag))
         lag_m = ((avail - t.event_ts).dt.days / 30.4375).to_numpy()
     elif method == "det_B":
         lag_m = np.full(len(t), la["hie_hours"] / 24 / 30.4375)
@@ -75,6 +79,30 @@ def latency_curve(
         for m in range(horizon_months + 1)
     ]
     return pd.DataFrame(rows)
+
+
+def latency_milestones(ls: pd.DataFrame, at=(6, 12, 18, 24, 36, 48)) -> pd.DataFrame:
+    """Share of true links available at fixed months after the encounter, per assumed lag."""
+    rows = []
+    for (method, lag), g in ls.groupby(
+        ["method", ls.probabilistic_lag_months_after_year_end.fillna(-1)], sort=True
+    ):
+        g = g.set_index("months_since_encounter").share_of_true_links_available
+        row = {
+            "method": method,
+            "probabilistic_lag_months_after_year_end": None if lag == -1 else int(lag),
+            "earliest_month_available": None if lag == -1 else int(lag),
+            "latest_month_available": None if lag == -1 else int(lag) + 12,
+        }
+        row.update({f"share_available_at_{m}_months": float(g.loc[m]) for m in at})
+        rows.append(row)
+    out = pd.DataFrame(rows)
+    out["probabilistic_lag_months_after_year_end"] = (
+        out.probabilistic_lag_months_after_year_end.astype("Int64")
+    )
+    for c in ("earliest_month_available", "latest_month_available"):
+        out[c] = out[c].astype("Int64")
+    return out
 
 
 def run(cfg: dict) -> dict:
@@ -145,6 +173,17 @@ def run(cfg: dict) -> dict:
             ["ems_uuid", "ed_encounter_id"],
         )
 
+    # latency sensitivity (ILLUSTRATIVE ASSUMPTION): probabilistic batch lag after year end
+    sens = []
+    for lag in cfg["latency_assumptions"]["probabilistic_lag_sensitivity_months"]:
+        c = latency_curve(
+            preds["splink_time"], truth, gt_ems, "splink_time", cfg, prob_lag_months=lag
+        )
+        sens.append(c.assign(probabilistic_lag_months_after_year_end=lag))
+    c = latency_curve(preds["det_C"], truth, gt_ems, "det_C", cfg)
+    sens.append(c.assign(probabilistic_lag_months_after_year_end=None))
+    latency_sens = pd.concat(sens, ignore_index=True)
+
     # misses explained: why did Splink (time) miss true links?
     found = set(
         zip(preds["splink_time"].ems_uuid, preds["splink_time"].ed_encounter_id, strict=True)
@@ -183,6 +222,8 @@ def run(cfg: dict) -> dict:
         "subgroups": pd.concat(sub_frames, ignore_index=True),
         "sweep": pd.DataFrame(sweep_rows),
         "latency": pd.concat(lat_frames, ignore_index=True),
+        "latency_sensitivity": latency_sens,
+        "splink_time_scored": extra["splink_time"]["scored"],
         "runtime": runtime,
         "models": {k: v["model"] for k, v in extra.items()},
         "miss_reasons": miss_reasons,
@@ -212,6 +253,26 @@ def save(cfg: dict, out: dict) -> None:
     write_csv(out["subgroups"], rd / "subgroup_recall.csv", ["method", "dimension", "group"])
     write_csv(out["sweep"], rd / "threshold_sweep.csv", ["method", "threshold"])
     write_csv(out["latency"], rd / "latency.csv", ["method", "months_since_encounter"])
+    ls = out["latency_sensitivity"].copy()
+    ls["probabilistic_lag_months_after_year_end"] = (
+        ls.probabilistic_lag_months_after_year_end.astype("Int64")
+    )
+    write_csv(
+        ls,
+        rd / "latency_sensitivity.csv",
+        ["method", "probabilistic_lag_months_after_year_end", "months_since_encounter"],
+    )
+    write_csv(
+        latency_milestones(out["latency_sensitivity"]),
+        rd / "latency_sensitivity_summary.csv",
+        ["method", "probabilistic_lag_months_after_year_end"],
+    )
+    # scored candidate pairs are needed to rebuild the hybrid under sensitivity scenarios
+    write_parquet(
+        out["splink_time_scored"],
+        resolve_paths(cfg)["data_dir"] / "linked" / "splink_time_scored.parquet",
+        ["match_probability", "ems_uuid", "ed_encounter_id"],
+    )
     write_json({"disclaimer": DISCLAIMER, **out["models"]}, rd / "splink_model.json")
     write_json(
         {

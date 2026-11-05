@@ -26,3 +26,48 @@ def expected_carry_rate(pass_rates: list[float]) -> float:
     for p in pass_rates:
         out *= p
     return out
+
+
+def agency_strata(ems, cfg: dict) -> dict[str, str]:
+    """EMS UUID -> urbanicity of the responding agency's county ('urban' / 'rural').
+
+    In this synthetic world each county has one agency, and agencies in rural counties stand in
+    for "rural / small agencies" in the sensitivity scenario.
+    """
+    urb = {c["code"]: c["urbanicity"] for c in cfg["geography"]["counties"]}
+    return dict(zip(ems.ems_uuid, ems.incident_county.map(urb), strict=True))
+
+
+def stage_by_stratum(
+    rng: np.random.Generator,
+    ids: list[str],
+    pass_rate: float,
+    stage_name: str,
+    pattern_cfg: dict,
+    strata: dict[str, str],
+) -> tuple[list[str], list[str]]:
+    """Like `stage`, but a stratum may have its own pass rate.
+
+    `pattern_cfg["stratum_overrides"]` maps stratum -> {stage_name: rate}. With no override for
+    this stage the call is exactly `stage(...)` (same RNG draws), so the baseline is unchanged.
+    Within each stratum the survivor count is exact, so expected carry per stratum is the
+    product of that stratum's pass rates.
+    """
+    overrides = {
+        s: o[stage_name]
+        for s, o in (pattern_cfg.get("stratum_overrides") or {}).items()
+        if stage_name in o
+    }
+    if not overrides:
+        return stage(rng, ids, pass_rate)
+    survivors, failures = [], []
+    for s in sorted({strata[i] for i in ids}):
+        keep, drop = stage(rng, [i for i in ids if strata[i] == s], overrides.get(s, pass_rate))
+        survivors += keep
+        failures += drop
+    return sorted(survivors), sorted(failures)
+
+
+def stratum_rate(pattern_cfg: dict, stratum: str, stage_name: str) -> float:
+    o = (pattern_cfg.get("stratum_overrides") or {}).get(stratum, {})
+    return o.get(stage_name, pattern_cfg[stage_name])

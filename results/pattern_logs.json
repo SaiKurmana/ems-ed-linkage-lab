@@ -4,6 +4,10 @@
     "A": {
       "ed_records_with_uuid": 6422,
       "expected_carry_rate": 0.829932,
+      "expected_carry_rate_by_agency_urbanicity": {
+        "rural": 0.829932,
+        "urban": 0.829932
+      },
       "interface_live": 7119,
       "message_delivered": 6905,
       "n_transported": 7738,
@@ -32,6 +36,10 @@
       "ed_record_bundles_validated": 9209,
       "ed_records_with_uuid": 7096,
       "expected_carry_rate": 0.917035,
+      "expected_carry_rate_by_agency_urbanicity": {
+        "rural": 0.917035,
+        "urban": 0.917035
+      },
       "identifier_retained": 7096,
       "n_transported": 7738,
       "observed_carry_rate": 0.917033,
