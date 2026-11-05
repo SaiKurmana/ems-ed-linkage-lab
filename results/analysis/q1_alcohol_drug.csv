@@ -1,7 +1,7 @@
-link_source,mechanism,ed_visits,linked_visits,with_indicator,share_of_linked_ems_visits,share_of_all_ed_visits
-truth,Fall,5634,4754,247,0.0519562,0.043841
-truth,MVC,3575,2984,551,0.184651,0.154126
-det_C,Fall,5634,4343,227,0.052268,0.0402911
-det_C,MVC,3575,2753,515,0.187069,0.144056
-splink_time,Fall,5634,4269,228,0.0534083,0.0404686
-splink_time,MVC,3575,2645,491,0.185633,0.137343
+data_label,link_source,mechanism,ed_visits,linked_visits,with_indicator,share_of_linked_ems_visits,share_of_all_ed_visits
+Synthetic data — for demonstration only.,truth,Fall,5634,4754,247,0.0519562,0.043841
+Synthetic data — for demonstration only.,truth,MVC,3575,2984,551,0.184651,0.154126
+Synthetic data — for demonstration only.,det_C,Fall,5634,4343,227,0.052268,0.0402911
+Synthetic data — for demonstration only.,det_C,MVC,3575,2753,515,0.187069,0.144056
+Synthetic data — for demonstration only.,splink_time,Fall,5634,4269,228,0.0534083,0.0404686
+Synthetic data — for demonstration only.,splink_time,MVC,3575,2645,491,0.185633,0.137343

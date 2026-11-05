@@ -7,12 +7,18 @@ import math
 from pathlib import Path
 
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+from common import DISCLAIMER
 
 
 def write_parquet(df: pd.DataFrame, path: Path, sort_by: list[str] | str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     df = df.sort_values(sort_by, kind="mergesort").reset_index(drop=True)
-    df.to_parquet(path, index=False)
+    table = pa.Table.from_pandas(df, preserve_index=False)
+    meta = {**(table.schema.metadata or {}), b"disclaimer": DISCLAIMER.encode("utf-8")}
+    pq.write_table(table.replace_schema_metadata(meta), path)
     return path
 
 
@@ -20,6 +26,8 @@ def write_csv(df: pd.DataFrame, path: Path, sort_by: list[str] | str | None = No
     path.parent.mkdir(parents=True, exist_ok=True)
     if sort_by:
         df = df.sort_values(sort_by, kind="mergesort")
+    df = df.copy()
+    df.insert(0, "data_label", DISCLAIMER)  # every exported dataset is self-labelled
     df.to_csv(path, index=False, lineterminator="\n", float_format="%.6g")
     return path
 

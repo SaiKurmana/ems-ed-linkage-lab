@@ -215,6 +215,7 @@ def save(cfg: dict, out: dict) -> None:
     write_json({"disclaimer": DISCLAIMER, **out["models"]}, rd / "splink_model.json")
     write_json(
         {
+            "disclaimer": DISCLAIMER,
             "note": "Wall-clock seconds on the machine that last ran `make link`; varies by machine.",
             "seconds": {k: round(v, 2) for k, v in out["runtime"].items()},
         },
