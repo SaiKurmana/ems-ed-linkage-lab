@@ -74,3 +74,68 @@ def test_pydantic_pinned_below_2_for_fhir_resources():
     assert pin and int(pin.group(1)) < 2
     assert re.search(r"^fhir\.resources==6\.1\.0$", req, flags=re.M)
     assert pydantic.VERSION.startswith("1.")
+
+
+# Built from parts so this test file does not match its own search.
+PLACEHOLDER = "APP" + "_URL"
+LIVE_APP = "https://ems-ed-linkage.streamlit.app/"
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "data",
+    "_site",
+    ".ci_run",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+}
+TEXT_SUFFIXES = {
+    ".py",
+    ".md",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".txt",
+    ".html",
+    ".css",
+    ".js",
+    ".json",
+    ".csv",
+    ".hl7",
+    "",
+}
+
+
+def _repo_text_files():
+    for p in REPO.rglob("*"):
+        if (
+            p.is_file()
+            and not SKIP_DIRS & set(p.relative_to(REPO).parts)
+            and p.suffix in TEXT_SUFFIXES
+        ):
+            yield p
+
+
+def test_app_url_placeholder_never_reappears_in_repo():
+    hits = [
+        str(p.relative_to(REPO))
+        for p in _repo_text_files()
+        if PLACEHOLDER in p.read_text(encoding="utf-8", errors="ignore")
+    ]
+    assert not hits, f"{PLACEHOLDER} placeholder found in: {hits}"
+
+
+def test_site_links_live_app_everywhere(tmp_path):
+    import yaml
+
+    assert yaml.safe_load((REPO / "site_src" / "site.yaml").read_text())["app_url"] == LIVE_APP
+    out = build(tmp_path / "_site")
+    index = (out / "index.html").read_text(encoding="utf-8")
+    assert f'<a class="btn" href="{LIVE_APP}">Open the interactive app</a>' in index
+    for page in out.rglob("*.html"):
+        text = page.read_text(encoding="utf-8")
+        assert PLACEHOLDER not in text, page
+        footer = text[text.index('<footer class="site">') :]
+        assert f'href="{LIVE_APP}"' in footer, page
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    assert LIVE_APP in readme

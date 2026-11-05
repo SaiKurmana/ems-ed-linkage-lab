@@ -11,7 +11,7 @@ fall injuries.**
 > NEMSIS, or any agency. All data are synthetic.**
 
 [![CI](https://github.com/saikurmana/ems-ed-linkage-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/saikurmana/ems-ed-linkage-lab/actions/workflows/ci.yml)
-· Site: <https://saikurmana.github.io/ems-ed-linkage-lab/> · App: `APP_URL` (placeholder — run locally with `make app`)
+· Site: <https://saikurmana.github.io/ems-ed-linkage-lab/> · App: <https://ems-ed-linkage.streamlit.app/> (or run locally with `make app`)
 
 ## Practical takeaway
 
@@ -110,7 +110,8 @@ The app reads only committed files (`results/`, `examples/`), so no pipeline run
   `pydantic==1.10.27` (pydantic must stay < 2 for that release).
 - **Python version:** choose **3.11** in the app's advanced settings, to match CI and the tested
   environment.
-- After deploying, replace the `APP_URL` placeholder in `site_src/site.yaml` and in this README.
+- **Live app:** <https://ems-ed-linkage.streamlit.app/> — its URL is set in `site_src/site.yaml` (`app_url`),
+  which the site uses for the landing-page button, the "Explore it" card and every page footer.
 
 ## Results (synthetic data — for demonstration only)
 

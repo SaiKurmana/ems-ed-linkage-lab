@@ -76,6 +76,7 @@ def page(
   <p><strong>{esc(DISCLAIMER)}</strong></p>
   <p>{esc(AFFILIATION)}</p>
   <p>Author: {esc(cfg["author"])} · <a href="{esc(cfg["repo_url"])}">Source on GitHub</a> ·
+     <a href="{esc(cfg["app_url"])}">Interactive app</a> ·
      <a href="{root}docs/standards_references.html">Standards references</a></p>
 </div></footer>
 </body>
@@ -301,11 +302,7 @@ def build_index(cfg: dict, out: Path) -> None:
     c = prof["counts"]
 
     app_url = cfg["app_url"]
-    app_link = (
-        f'<a class="btn" href="{esc(app_url)}">Open the interactive app</a>'
-        if app_url and app_url != "APP_URL"
-        else '<a class="btn" href="#app">Run the interactive app</a>'
-    )
+    app_link = f'<a class="btn" href="{esc(app_url)}">Open the interactive app</a>'
     a_ex = (REPO / "examples" / "pattern_a" / "example_1_hospital_ADT_A04.hl7").read_text()
     a_ex = "\n".join(ln for ln in a_ex.splitlines() if not ln.startswith("#"))
     a_uuid = next(ln for ln in a_ex.splitlines() if ln.startswith("PV1")).split("|")[50]
@@ -442,7 +439,7 @@ def build_index(cfg: dict, out: Path) -> None:
   <div class="grid">
     <div class="card"><h3>Interactive app</h3><p>Pattern explorer, linkage scoreboard, bias tab and
     “what linkage enables” — runs offline from committed files.</p>
-    <p>{('<a href="' + esc(app_url) + '">Open the hosted app</a>') if app_url != "APP_URL" else "Hosted app: <code>APP_URL</code> (placeholder)."}</p>
+    <p><a href="{esc(app_url)}">Open the hosted app</a> — or run it locally:</p>
     <pre>pip install -r requirements.txt
 make app</pre></div>
     <div class="card"><h3>Reproduce everything</h3><p>Fixed seed, sorted exports — the same commands produce the
@@ -515,6 +512,8 @@ def build_examples(cfg: dict, out: Path) -> None:
 
 def build(out: Path) -> Path:
     cfg = yaml.safe_load((SRC / "site.yaml").read_text())
+    if not str(cfg.get("app_url", "")).startswith("https://"):
+        raise ValueError("site_src/site.yaml: app_url must be the hosted app's https:// URL")
     dcfg = yaml.safe_load((REPO / "config" / "default.yaml").read_text())
     cfg["_prob_lag"] = dcfg["latency_assumptions"]["probabilistic_months_after_year_end"]
     if out.exists():
