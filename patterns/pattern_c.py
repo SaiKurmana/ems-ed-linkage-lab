@@ -203,9 +203,65 @@ def ed_record_bundle(r, ems_uuid: str | None) -> dict:
     }
 
 
+# FHIR R4 required-binding code systems used in our bundles (verified from hl7.org/fhir/R4).
+# fhir.resources 6.1.0 enforces structure, cardinality, datatypes and unknown elements, but not
+# required-binding code values, so those are checked explicitly here.
+REQUIRED_CODES = {
+    "Bundle.type": {
+        "document",
+        "message",
+        "transaction",
+        "transaction-response",
+        "batch",
+        "batch-response",
+        "history",
+        "searchset",
+        "collection",
+    },
+    "Bundle.entry.request.method": {"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"},
+    "Encounter.status": {
+        "planned",
+        "arrived",
+        "triaged",
+        "in-progress",
+        "onleave",
+        "finished",
+        "cancelled",
+        "entered-in-error",
+        "unknown",
+    },
+    "Identifier.use": {"usual", "official", "temp", "secondary", "old"},
+    "Patient.gender": {"male", "female", "other", "unknown"},
+}
+
+
+class FHIRCodeError(ValueError):
+    pass
+
+
+def _check(path: str, value) -> None:
+    if value is not None and value not in REQUIRED_CODES[path]:
+        raise FHIRCodeError(f"{path}: {value!r} is not in the required R4 value set")
+
+
 def validate(bundle: dict) -> Bundle:
-    """Parse with fhir.resources (raises pydantic.ValidationError on invalid content)."""
-    return Bundle.parse_obj(bundle)
+    """Validate with fhir.resources (R4 4.0.1 models) + required-binding code checks.
+
+    Raises pydantic.ValidationError (structure) or FHIRCodeError (code value).
+    """
+    b = Bundle.parse_obj(bundle)
+    _check("Bundle.type", b.type)
+    for entry in b.entry or []:
+        if entry.request is not None:
+            _check("Bundle.entry.request.method", entry.request.method)
+        res = entry.resource
+        if res.resource_type == "Encounter":
+            _check("Encounter.status", res.status)
+        if res.resource_type == "Patient":
+            _check("Patient.gender", res.gender)
+        for ident in getattr(res, "identifier", None) or []:
+            _check("Identifier.use", ident.use)
+    return b
 
 
 def ems_uuid_from_bundle(b: Bundle) -> str | None:

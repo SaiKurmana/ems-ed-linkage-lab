@@ -10,3 +10,4 @@ _site/
 *.duckdb
 *.duckdb.wal
 .DS_Store
+.ci_run/

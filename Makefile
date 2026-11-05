@@ -35,7 +35,7 @@ app:
 	$(PYTHON) -m streamlit run app/streamlit_app.py
 
 ci:          ## small end-to-end run into a temp directory (used by GitHub Actions)
-	$(PYTHON) -m pipeline_ci
+	$(PYTHON) -m pipeline --config config/ci.yaml --workdir .ci_run
 
 clean:
-	rm -rf data _site .pytest_cache .ruff_cache
+	rm -rf data _site .ci_run .pytest_cache .ruff_cache
