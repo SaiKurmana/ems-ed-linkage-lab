@@ -71,8 +71,27 @@ INJURY_DX = {
     },
 }
 # Hip fractures (S72.00-) are concentrated in older-adult falls; head injuries span both.
-FALL_PREFERRED = {"S72001A", "S72002A", "S52501A", "S52502A", "S0083XA", "S060X0A", "S065X0A", "S3210XA"}
-MVC_PREFERRED = {"S134XXA", "S20219A", "S2231XA", "S2241XA", "S270XXA", "S36116A", "S32810A", "T07XXXA", "S82101A"}
+FALL_PREFERRED = {
+    "S72001A",
+    "S72002A",
+    "S52501A",
+    "S52502A",
+    "S0083XA",
+    "S060X0A",
+    "S065X0A",
+    "S3210XA",
+}
+MVC_PREFERRED = {
+    "S134XXA",
+    "S20219A",
+    "S2231XA",
+    "S2241XA",
+    "S270XXA",
+    "S36116A",
+    "S32810A",
+    "T07XXXA",
+    "S82101A",
+}
 
 ALL_ICD10CM = {
     **{c: d for m in EXTERNAL_CAUSE.values() for c, d in m.items()},

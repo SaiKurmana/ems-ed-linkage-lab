@@ -5,7 +5,9 @@ from __future__ import annotations
 import numpy as np
 
 
-def stage(rng: np.random.Generator, ids: list[str], pass_rate: float) -> tuple[list[str], list[str]]:
+def stage(
+    rng: np.random.Generator, ids: list[str], pass_rate: float
+) -> tuple[list[str], list[str]]:
     """Exact-count survival sampling.
 
     Exactly round(pass_rate * len(ids)) ids survive, so the end-to-end carry rate of a chain of

@@ -1,0 +1,7 @@
+link_source,field_triage,n,admitted_transferred_or_died
+truth,High-risk criteria documented,1461,0.763176
+truth,No high-risk criteria,6277,0.344113
+det_C,High-risk criteria documented,1334,0.764618
+det_C,No high-risk criteria,5762,0.341375
+splink_time,High-risk criteria documented,939,0.665602
+splink_time,No high-risk criteria,5975,0.318494

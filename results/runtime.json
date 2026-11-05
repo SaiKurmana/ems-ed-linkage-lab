@@ -1,0 +1,11 @@
+{
+  "note": "Wall-clock seconds on the machine that last ran `make link`; varies by machine.",
+  "seconds": {
+    "det_A": 0.06,
+    "det_B": 0.04,
+    "det_C": 0.04,
+    "hybrid_C": 4.87,
+    "splink_date": 3.06,
+    "splink_time": 4.7
+  }
+}

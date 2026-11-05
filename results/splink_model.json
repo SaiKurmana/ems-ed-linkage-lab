@@ -1,0 +1,370 @@
+{
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "splink_date": {
+    "comparisons": [
+      {
+        "bayes_factor": 349.662436,
+        "comparison": "first_name",
+        "level": "Exact match on first_name",
+        "m": 0.904387,
+        "u": 0.002586
+      },
+      {
+        "bayes_factor": 32.349307,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.92",
+        "m": 0.034582,
+        "u": 0.001069
+      },
+      {
+        "bayes_factor": 8.897788,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.88",
+        "m": 0.006939,
+        "u": 0.00078
+      },
+      {
+        "bayes_factor": 1.565881,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.7",
+        "m": 0.050616,
+        "u": 0.032324
+      },
+      {
+        "bayes_factor": 0.003609,
+        "comparison": "first_name",
+        "level": "All other comparisons",
+        "m": 0.003477,
+        "u": 0.96324
+      },
+      {
+        "bayes_factor": 471.495183,
+        "comparison": "last_name",
+        "level": "Exact match on last_name",
+        "m": 0.945267,
+        "u": 0.002005
+      },
+      {
+        "bayes_factor": 60.724346,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.92",
+        "m": 0.037489,
+        "u": 0.000617
+      },
+      {
+        "bayes_factor": 17.923959,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.88",
+        "m": 0.008503,
+        "u": 0.000474
+      },
+      {
+        "bayes_factor": 0.215544,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.7",
+        "m": 0.003602,
+        "u": 0.016711
+      },
+      {
+        "bayes_factor": 0.005242,
+        "comparison": "last_name",
+        "level": "All other comparisons",
+        "m": 0.005138,
+        "u": 0.980192
+      },
+      {
+        "bayes_factor": 7002.624625,
+        "comparison": "dob",
+        "level": "Exact match on date of birth",
+        "m": 0.908523,
+        "u": 0.00013
+      },
+      {
+        "bayes_factor": 41.226822,
+        "comparison": "dob",
+        "level": "Levenshtein distance <= 1",
+        "m": 0.042148,
+        "u": 0.001022
+      },
+      {
+        "bayes_factor": 13.817071,
+        "comparison": "dob",
+        "level": "Abs date difference <= 1 month",
+        "m": 0.020454,
+        "u": 0.00148
+      },
+      {
+        "bayes_factor": 0.759128,
+        "comparison": "dob",
+        "level": "Abs date difference <= 1 year",
+        "m": 0.015536,
+        "u": 0.020465
+      },
+      {
+        "bayes_factor": 0.06962,
+        "comparison": "dob",
+        "level": "Abs date difference <= 10 year",
+        "m": 0.013336,
+        "u": 0.19155
+      },
+      {
+        "bayes_factor": 4e-06,
+        "comparison": "dob",
+        "level": "All other comparisons",
+        "m": 3e-06,
+        "u": 0.785352
+      },
+      {
+        "bayes_factor": 2.00438,
+        "comparison": "sex",
+        "level": "Exact match on sex",
+        "m": 0.999994,
+        "u": 0.498904
+      },
+      {
+        "bayes_factor": 1.2e-05,
+        "comparison": "sex",
+        "level": "All other comparisons",
+        "m": 6e-06,
+        "u": 0.501096
+      },
+      {
+        "bayes_factor": 1.623223,
+        "comparison": "race_eth",
+        "level": "Exact match on race_eth",
+        "m": 0.900854,
+        "u": 0.554978
+      },
+      {
+        "bayes_factor": 0.22279,
+        "comparison": "race_eth",
+        "level": "All other comparisons",
+        "m": 0.099146,
+        "u": 0.445022
+      },
+      {
+        "bayes_factor": 3.160683,
+        "comparison": "county",
+        "level": "Exact match on county",
+        "m": 0.619245,
+        "u": 0.195921
+      },
+      {
+        "bayes_factor": 0.473529,
+        "comparison": "county",
+        "level": "All other comparisons",
+        "m": 0.380755,
+        "u": 0.804079
+      },
+      {
+        "bayes_factor": 294.821483,
+        "comparison": "arrival_date",
+        "level": "Exact match on arrival_date",
+        "m": 0.890381,
+        "u": 0.00302
+      },
+      {
+        "bayes_factor": 0.109951,
+        "comparison": "arrival_date",
+        "level": "All other comparisons",
+        "m": 0.109619,
+        "u": 0.99698
+      }
+    ],
+    "probability_two_random_records_match": 9.9e-05
+  },
+  "splink_time": {
+    "comparisons": [
+      {
+        "bayes_factor": 218.207411,
+        "comparison": "first_name",
+        "level": "Exact match on first_name",
+        "m": 0.564384,
+        "u": 0.002586
+      },
+      {
+        "bayes_factor": 21.193803,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.92",
+        "m": 0.022657,
+        "u": 0.001069
+      },
+      {
+        "bayes_factor": 5.917962,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.88",
+        "m": 0.004615,
+        "u": 0.00078
+      },
+      {
+        "bayes_factor": 1.34222,
+        "comparison": "first_name",
+        "level": "Jaro-Winkler distance of first_name >= 0.7",
+        "m": 0.043386,
+        "u": 0.032324
+      },
+      {
+        "bayes_factor": 0.378886,
+        "comparison": "first_name",
+        "level": "All other comparisons",
+        "m": 0.364958,
+        "u": 0.96324
+      },
+      {
+        "bayes_factor": 294.44344,
+        "comparison": "last_name",
+        "level": "Exact match on last_name",
+        "m": 0.590309,
+        "u": 0.002005
+      },
+      {
+        "bayes_factor": 38.387195,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.92",
+        "m": 0.023699,
+        "u": 0.000617
+      },
+      {
+        "bayes_factor": 11.803336,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.88",
+        "m": 0.0056,
+        "u": 0.000474
+      },
+      {
+        "bayes_factor": 0.493296,
+        "comparison": "last_name",
+        "level": "Jaro-Winkler distance of last_name >= 0.7",
+        "m": 0.008244,
+        "u": 0.016711
+      },
+      {
+        "bayes_factor": 0.37967,
+        "comparison": "last_name",
+        "level": "All other comparisons",
+        "m": 0.372149,
+        "u": 0.980192
+      },
+      {
+        "bayes_factor": 1759.294483,
+        "comparison": "dob",
+        "level": "Exact match on date of birth",
+        "m": 0.228252,
+        "u": 0.00013
+      },
+      {
+        "bayes_factor": 11.55701,
+        "comparison": "dob",
+        "level": "Levenshtein distance <= 1",
+        "m": 0.011815,
+        "u": 0.001022
+      },
+      {
+        "bayes_factor": 4.239792,
+        "comparison": "dob",
+        "level": "Abs date difference <= 1 month",
+        "m": 0.006276,
+        "u": 0.00148
+      },
+      {
+        "bayes_factor": 0.923811,
+        "comparison": "dob",
+        "level": "Abs date difference <= 1 year",
+        "m": 0.018906,
+        "u": 0.020465
+      },
+      {
+        "bayes_factor": 0.76686,
+        "comparison": "dob",
+        "level": "Abs date difference <= 10 year",
+        "m": 0.146892,
+        "u": 0.19155
+      },
+      {
+        "bayes_factor": 0.748529,
+        "comparison": "dob",
+        "level": "All other comparisons",
+        "m": 0.587859,
+        "u": 0.785352
+      },
+      {
+        "bayes_factor": 1.621397,
+        "comparison": "sex",
+        "level": "Exact match on sex",
+        "m": 0.808922,
+        "u": 0.498904
+      },
+      {
+        "bayes_factor": 0.381321,
+        "comparison": "sex",
+        "level": "All other comparisons",
+        "m": 0.191078,
+        "u": 0.501096
+      },
+      {
+        "bayes_factor": 1.285415,
+        "comparison": "race_eth",
+        "level": "Exact match on race_eth",
+        "m": 0.713378,
+        "u": 0.554978
+      },
+      {
+        "bayes_factor": 0.644064,
+        "comparison": "race_eth",
+        "level": "All other comparisons",
+        "m": 0.286622,
+        "u": 0.445022
+      },
+      {
+        "bayes_factor": 3.16363,
+        "comparison": "county",
+        "level": "Exact match on county",
+        "m": 0.619823,
+        "u": 0.195921
+      },
+      {
+        "bayes_factor": 0.472811,
+        "comparison": "county",
+        "level": "All other comparisons",
+        "m": 0.380177,
+        "u": 0.804079
+      },
+      {
+        "bayes_factor": 0.552647,
+        "comparison": "ts",
+        "level": "Exact match on ts",
+        "m": 0.000513,
+        "u": 0.000928
+      },
+      {
+        "bayes_factor": 3274.19277,
+        "comparison": "ts",
+        "level": "Abs difference of 'ts <= 20 minute'",
+        "m": 0.598698,
+        "u": 0.000183
+      },
+      {
+        "bayes_factor": 715.451988,
+        "comparison": "ts",
+        "level": "Abs difference of 'ts <= 60 minute'",
+        "m": 0.13119,
+        "u": 0.000183
+      },
+      {
+        "bayes_factor": 343.282821,
+        "comparison": "ts",
+        "level": "Abs difference of 'ts <= 240 minute'",
+        "m": 0.281409,
+        "u": 0.00082
+      },
+      {
+        "bayes_factor": 0.053849,
+        "comparison": "ts",
+        "level": "All other comparisons",
+        "m": 0.053785,
+        "u": 0.998814
+      }
+    ],
+    "probability_two_random_records_match": 9.9e-05
+  }
+}

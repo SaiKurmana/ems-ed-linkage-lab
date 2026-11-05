@@ -51,17 +51,33 @@ def esc(s) -> str:
     if s is None or (isinstance(s, float) and pd.isna(s)):
         return ""
     s = str(s)
-    return (s.replace("\\", "\\E\\").replace("|", "\\F\\").replace("^", "\\S\\")
-            .replace("~", "\\R\\").replace("&", "\\T\\"))
+    return (
+        s.replace("\\", "\\E\\")
+        .replace("|", "\\F\\")
+        .replace("^", "\\S\\")
+        .replace("~", "\\R\\")
+        .replace("&", "\\T\\")
+    )
 
 
 def msh(sending_app, sending_fac, recv_app, recv_fac, when, event, structure, control_id) -> str:
-    return (f"MSH|^~\\&|{sending_app}|{sending_fac}|{recv_app}|{recv_fac}|{ts(when)}||"
-            f"ADT^{event}^{structure}|{control_id}|T|2.5.1")
+    return (
+        f"MSH|^~\\&|{sending_app}|{sending_fac}|{recv_app}|{recv_fac}|{ts(when)}||"
+        f"ADT^{event}^{structure}|{control_id}|T|2.5.1"
+    )
 
 
-def pid(identifier: str, assigning_authority: str, id_type: str, last, first, birth, sex,
-        race=None, ethnicity=None) -> str:
+def pid(
+    identifier: str,
+    assigning_authority: str,
+    id_type: str,
+    last,
+    first,
+    birth,
+    sex,
+    race=None,
+    ethnicity=None,
+) -> str:
     fields = [""] * 23
     fields[0] = "PID"
     fields[1] = "1"
@@ -76,8 +92,15 @@ def pid(identifier: str, assigning_authority: str, id_type: str, last, first, bi
     return "|".join(fields).rstrip("|")
 
 
-def pv1(location_facility=None, visit_number=None, visit_aa=None, discharged_to=None,
-        admit_ts=None, discharge_ts=None, ems_uuid=None) -> str:
+def pv1(
+    location_facility=None,
+    visit_number=None,
+    visit_aa=None,
+    discharged_to=None,
+    admit_ts=None,
+    discharge_ts=None,
+    ems_uuid=None,
+) -> str:
     f = [""] * 51
     f[0] = "PV1"
     f[1] = "1"

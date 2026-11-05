@@ -1,0 +1,125 @@
+{
+  "definitions": {
+    "false_match_rate": "FP / (TP + FP): share of declared links that are wrong",
+    "missed_link_rate": "FN / (TP + FN)",
+    "precision": "TP / (TP + FP)",
+    "recall": "TP / (TP + FN)"
+  },
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "match_threshold": 0.9,
+  "methods": {
+    "det_A": {
+      "f1": 0.907062,
+      "false_match_rate": 0.0,
+      "false_negatives": 1316,
+      "false_positives": 0,
+      "family": "deterministic",
+      "label": "Deterministic UUID — Pattern A (HL7 v2 point-to-point)",
+      "missed_link_rate": 0.17007,
+      "n_declared_links": 6422,
+      "precision": 1.0,
+      "recall": 0.82993,
+      "true_positives": 6422
+    },
+    "det_B": {
+      "f1": 0.853884,
+      "false_match_rate": 0.0,
+      "false_negatives": 1973,
+      "false_positives": 0,
+      "family": "deterministic",
+      "label": "Deterministic UUID — Pattern B (HIE match + write-back)",
+      "missed_link_rate": 0.254975,
+      "n_declared_links": 5765,
+      "precision": 1.0,
+      "recall": 0.745025,
+      "true_positives": 5765
+    },
+    "det_C": {
+      "f1": 0.956721,
+      "false_match_rate": 0.0,
+      "false_negatives": 642,
+      "false_positives": 0,
+      "family": "deterministic",
+      "label": "Deterministic UUID — Pattern C (FHIR API identifier)",
+      "missed_link_rate": 0.082967,
+      "n_declared_links": 7096,
+      "precision": 1.0,
+      "recall": 0.917033,
+      "true_positives": 7096
+    },
+    "hybrid_C": {
+      "f1": 0.994166,
+      "false_match_rate": 0.002601,
+      "false_negatives": 70,
+      "false_positives": 20,
+      "family": "hybrid",
+      "label": "Hybrid — Pattern C UUID first, then Splink (time) on the rest",
+      "missed_link_rate": 0.009046,
+      "n_declared_links": 7688,
+      "precision": 0.997399,
+      "recall": 0.990954,
+      "true_positives": 7668
+    },
+    "splink_date": {
+      "f1": 0.933872,
+      "false_match_rate": 0.007132,
+      "false_negatives": 917,
+      "false_positives": 49,
+      "family": "probabilistic",
+      "label": "Probabilistic — Splink, name/DOB/sex/race/county + arrival date only",
+      "missed_link_rate": 0.118506,
+      "n_declared_links": 6870,
+      "precision": 0.992868,
+      "recall": 0.881494,
+      "true_positives": 6821
+    },
+    "splink_time": {
+      "f1": 0.938984,
+      "false_match_rate": 0.005062,
+      "false_negatives": 859,
+      "false_positives": 35,
+      "family": "probabilistic",
+      "label": "Probabilistic — Splink, name/DOB/sex/race/county + arrival time",
+      "missed_link_rate": 0.111011,
+      "n_declared_links": 6914,
+      "precision": 0.994938,
+      "recall": 0.888989,
+      "true_positives": 6879
+    }
+  },
+  "n_true_links": 7738,
+  "splink_time_recall_by_data_quality_issue": {
+    "dob_error": {
+      "n_true_links_with_issue": 693,
+      "splink_time_recall_when_present": 0.874459
+    },
+    "dob_missing": {
+      "n_true_links_with_issue": 496,
+      "splink_time_recall_when_present": 0.905242
+    },
+    "name_typo": {
+      "n_true_links_with_issue": 786,
+      "splink_time_recall_when_present": 0.85369
+    },
+    "name_variant": {
+      "n_true_links_with_issue": 915,
+      "splink_time_recall_when_present": 0.888525
+    },
+    "no_issue": {
+      "n_true_links_with_issue": 3096,
+      "splink_time_recall_when_present": 1.0
+    },
+    "race_misclass": {
+      "n_true_links_with_issue": 833,
+      "splink_time_recall_when_present": 0.896759
+    },
+    "trauma_alias": {
+      "n_true_links_with_issue": 614,
+      "splink_time_recall_when_present": 0.0
+    },
+    "unidentified": {
+      "n_true_links_with_issue": 318,
+      "splink_time_recall_when_present": 0.0
+    }
+  }
+}

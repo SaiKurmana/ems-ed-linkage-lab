@@ -54,25 +54,39 @@ def _iso(ts) -> str:
     return pd.Timestamp(ts).strftime("%Y-%m-%dT%H:%M:%S") + "-05:00"
 
 
-def encounter_resource(r, ems_uuid: str | None, patient_ref: str, condition_refs: list[str] | None = None) -> dict:
-    ident = [{
-        "use": "usual",
-        "type": {"coding": [{"system": V2_0203, "code": "VN", "display": "Visit number"}]},
-        "system": HOSPITAL_VISIT_SYSTEM_TMPL.format(hospital=r.hospital_id),
-        "value": r.ed_encounter_id,
-    }]
+def encounter_resource(
+    r, ems_uuid: str | None, patient_ref: str, condition_refs: list[str] | None = None
+) -> dict:
+    ident = [
+        {
+            "use": "usual",
+            "type": {"coding": [{"system": V2_0203, "code": "VN", "display": "Visit number"}]},
+            "system": HOSPITAL_VISIT_SYSTEM_TMPL.format(hospital=r.hospital_id),
+            "value": r.ed_encounter_id,
+        }
+    ]
     if ems_uuid:
-        ident.append({
-            "use": "secondary",
-            "type": {"text": "EMS patient care report UUID"},
-            "system": EMS_UUID_SYSTEM,
-            "value": ems_uuid,
-        })
+        ident.append(
+            {
+                "use": "secondary",
+                "type": {"text": "EMS patient care report UUID"},
+                "system": EMS_UUID_SYSTEM,
+                "value": ems_uuid,
+            }
+        )
     enc = {
         "resourceType": "Encounter",
         "id": _uid("Encounter", r.ed_encounter_id),
-        "extension": [{"url": MODE_OF_ARRIVAL_EXT, "valueCoding": {
-            "system": V2_0430, "code": r.arrival_mode, "display": ARRIVAL_TEXT.get(r.arrival_mode, "")}}],
+        "extension": [
+            {
+                "url": MODE_OF_ARRIVAL_EXT,
+                "valueCoding": {
+                    "system": V2_0430,
+                    "code": r.arrival_mode,
+                    "display": ARRIVAL_TEXT.get(r.arrival_mode, ""),
+                },
+            }
+        ],
         "identifier": ident,
         "status": "finished",
         "class": {"system": ACT_CODE, "code": "EMER", "display": "emergency"},
@@ -82,10 +96,16 @@ def encounter_resource(r, ems_uuid: str | None, patient_ref: str, condition_refs
     }
     if isinstance(r.disposition, str):
         code, display, text = DISPOSITION[r.disposition]
-        enc["hospitalization"] = {"dischargeDisposition": {
-            "coding": [{"system": DISCH, "code": code, "display": display}], "text": text}}
+        enc["hospitalization"] = {
+            "dischargeDisposition": {
+                "coding": [{"system": DISCH, "code": code, "display": display}],
+                "text": text,
+            }
+        }
     if condition_refs:
-        enc["diagnosis"] = [{"condition": {"reference": c}, "rank": i + 1} for i, c in enumerate(condition_refs)]
+        enc["diagnosis"] = [
+            {"condition": {"reference": c}, "rank": i + 1} for i, c in enumerate(condition_refs)
+        ]
     return enc
 
 
@@ -93,12 +113,18 @@ def patient_resource(r) -> dict:
     p = {
         "resourceType": "Patient",
         "id": _uid("Patient", r.mrn),
-        "identifier": [{
-            "use": "usual",
-            "type": {"coding": [{"system": V2_0203, "code": "MR", "display": "Medical record number"}]},
-            "system": HOSPITAL_MRN_SYSTEM_TMPL.format(hospital=r.hospital_id),
-            "value": r.mrn,
-        }],
+        "identifier": [
+            {
+                "use": "usual",
+                "type": {
+                    "coding": [
+                        {"system": V2_0203, "code": "MR", "display": "Medical record number"}
+                    ]
+                },
+                "system": HOSPITAL_MRN_SYSTEM_TMPL.format(hospital=r.hospital_id),
+                "value": r.mrn,
+            }
+        ],
         "name": [{"family": r.last_name.title(), "given": [r.first_name.title()]}],
         "gender": GENDER.get(r.sex, "unknown"),
         # US Core race/ethnicity extensions, text-only form (ombCategory codes omitted)
@@ -115,15 +141,27 @@ def patient_resource(r) -> dict:
 def condition_resources(r, patient_ref: str, encounter_ref: str) -> list[dict]:
     out = []
     for code in [c for c in str(r.dx_codes).split("|") if c] + [r.external_cause_code]:
-        out.append({
-            "resourceType": "Condition",
-            "id": _uid("Condition", f"{r.ed_encounter_id}/{code}"),
-            "clinicalStatus": {"coding": [{
-                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
-            "code": {"coding": [{"system": ICD10CM, "code": dotted(code), "display": ALL_ICD10CM[code]}]},
-            "subject": {"reference": patient_ref},
-            "encounter": {"reference": encounter_ref},
-        })
+        out.append(
+            {
+                "resourceType": "Condition",
+                "id": _uid("Condition", f"{r.ed_encounter_id}/{code}"),
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                        }
+                    ]
+                },
+                "code": {
+                    "coding": [
+                        {"system": ICD10CM, "code": dotted(code), "display": ALL_ICD10CM[code]}
+                    ]
+                },
+                "subject": {"reference": patient_ref},
+                "encounter": {"reference": encounter_ref},
+            }
+        )
     return out
 
 
@@ -137,11 +175,13 @@ def transaction_bundle(r, ems_uuid: str) -> dict:
         "id": _uid("txn", r.ed_encounter_id),
         "type": "transaction",
         "timestamp": _iso(r.arrival_ts),
-        "entry": [{
-            "fullUrl": f"https://ehr-{r.hospital_id.lower()}.example.org/fhir/Encounter/{enc['id']}",
-            "resource": enc,
-            "request": {"method": "PUT", "url": f"Encounter/{enc['id']}"},
-        }],
+        "entry": [
+            {
+                "fullUrl": f"https://ehr-{r.hospital_id.lower()}.example.org/fhir/Encounter/{enc['id']}",
+                "resource": enc,
+                "request": {"method": "PUT", "url": f"Encounter/{enc['id']}"},
+            }
+        ],
     }
 
 
@@ -177,8 +217,14 @@ def ems_uuid_from_bundle(b: Bundle) -> str | None:
     return None
 
 
-def run(ems: pd.DataFrame, ed: pd.DataFrame, truth_links: pd.DataFrame, cfg: dict,
-        rng: np.random.Generator, validate_all: bool = True) -> dict:
+def run(
+    ems: pd.DataFrame,
+    ed: pd.DataFrame,
+    truth_links: pd.DataFrame,
+    cfg: dict,
+    rng: np.random.Generator,
+    validate_all: bool = True,
+) -> dict:
     pc = cfg["patterns"]["C_fhir_api"]
     ids = sorted(ems[ems.destination_code.notna()].ems_uuid)
     link_map = dict(zip(truth_links.ems_uuid, truth_links.ed_encounter_id, strict=True))
@@ -193,8 +239,14 @@ def run(ems: pd.DataFrame, ed: pd.DataFrame, truth_links: pd.DataFrame, cfg: dic
         assert ems_uuid_from_bundle(b) == u
         n_txn_validated += 1
     retained, _ = stage(rng, success, pc["identifier_retained"])
-    log.update({"api_enabled": len(enabled), "api_call_success": len(success),
-                "identifier_retained": len(retained), "transaction_bundles_validated": n_txn_validated})
+    log.update(
+        {
+            "api_enabled": len(enabled),
+            "api_call_success": len(success),
+            "identifier_retained": len(retained),
+            "transaction_bundles_validated": n_txn_validated,
+        }
+    )
     carried = {link_map[u]: u for u in retained}
 
     out_uuid, n_valid = [], 0
@@ -215,6 +267,10 @@ def run(ems: pd.DataFrame, ed: pd.DataFrame, truth_links: pd.DataFrame, cfg: dic
     examples = []
     for u in sorted(retained)[: cfg["patterns"]["n_examples"]]:
         r = ed_rows[link_map[u]]
-        examples.append({"transaction_bundle": transaction_bundle(r, u),
-                         "ed_record_bundle": ed_record_bundle(r, u)})
+        examples.append(
+            {
+                "transaction_bundle": transaction_bundle(r, u),
+                "ed_record_bundle": ed_record_bundle(r, u),
+            }
+        )
     return {"ed_records": ed_out, "log": log, "examples": examples}
