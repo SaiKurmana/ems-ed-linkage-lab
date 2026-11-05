@@ -1,0 +1,42 @@
+{
+  "confounding_note": "Descriptive only. Patients who arrive by EMS differ systematically from those who arrive privately (injury severity, age, mechanism, time of day, access to transport). Differences in outcomes must not be read as effects of EMS transport.",
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "framing": "Demonstrations of what linkage makes possible — not findings.",
+  "headline": {
+    "det_C": {
+      "alcohol_share_of_linked_fall": 0.052268,
+      "alcohol_share_of_linked_mvc": 0.187069,
+      "high_risk_triage_admit_transfer_or_died": 0.764618,
+      "high_risk_triage_n_linked": 1334,
+      "median_interval_min_rural": 73.8875,
+      "median_interval_min_urban": 48.291667
+    },
+    "splink_time": {
+      "alcohol_share_of_linked_fall": 0.053408,
+      "alcohol_share_of_linked_mvc": 0.185633,
+      "high_risk_triage_admit_transfer_or_died": 0.665602,
+      "high_risk_triage_n_linked": 939,
+      "median_interval_min_rural": 71.975,
+      "median_interval_min_urban": 47.525
+    },
+    "truth": {
+      "alcohol_share_of_linked_fall": 0.051956,
+      "alcohol_share_of_linked_mvc": 0.184651,
+      "high_risk_triage_admit_transfer_or_died": 0.763176,
+      "high_risk_triage_n_linked": 1461,
+      "median_interval_min_rural": 73.745833,
+      "median_interval_min_urban": 48.233333
+    }
+  },
+  "link_sources": {
+    "det_C": "Deterministic UUID (Pattern C)",
+    "splink_time": "Probabilistic (Splink)",
+    "truth": "Ground truth (simulation only)"
+  },
+  "questions": {
+    "q1_alcohol_drug": "What share of ED visits for MVCs and falls had an EMS-documented alcohol/drug indicator (eHistory.17)?",
+    "q2_outcomes_by_arrival": "How do ED dispositions differ for EMS-transported vs privately arrived patients? (descriptive)",
+    "q3_ems_to_ed_interval": "How long from EMS unit notification (eTimes.03) to ED arrival, by urbanicity?",
+    "q4_field_triage": "Among linked EMS patients, how often are those with/without high-risk field-triage criteria (eInjury.03) admitted, transferred or die?"
+  }
+}

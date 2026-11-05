@@ -1,0 +1,13 @@
+data_label,link_source,urbanicity,mechanism,n,p25_min,median_min,p75_min,p90_min
+Synthetic data — for demonstration only.,truth,rural,Fall,1768,61.175,71.825,86.7375,116.027
+Synthetic data — for demonstration only.,truth,rural,MVC,1131,65.2833,75.6667,94.7417,123.017
+Synthetic data — for demonstration only.,truth,urban,Fall,2986,38.0833,45.4167,56.9417,69.9333
+Synthetic data — for demonstration only.,truth,urban,MVC,1853,42.2667,51.05,63.0333,75.4
+Synthetic data — for demonstration only.,det_C,rural,Fall,1620,61.1458,71.8917,86.5375,116.37
+Synthetic data — for demonstration only.,det_C,rural,MVC,1042,64.7542,75.8833,95.2667,123.247
+Synthetic data — for demonstration only.,det_C,urban,Fall,2723,38.025,45.4333,56.9167,69.6133
+Synthetic data — for demonstration only.,det_C,urban,MVC,1711,42.35,51.15,63.1083,75.4833
+Synthetic data — for demonstration only.,splink_time,rural,Fall,1588,60.4958,70.1667,82.4375,108.21
+Synthetic data — for demonstration only.,splink_time,rural,MVC,1002,64.1917,73.7833,86.9125,111.577
+Synthetic data — for demonstration only.,splink_time,urban,Fall,2681,37.7,44.7833,55.4667,68.95
+Synthetic data — for demonstration only.,splink_time,urban,MVC,1643,41.875,50.2667,61.7417,73.43

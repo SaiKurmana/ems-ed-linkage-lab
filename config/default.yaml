@@ -1,0 +1,129 @@
+# EMS–ED Linkage Lab — simulation configuration
+# Synthetic data — for demonstration only. Every number below is a SIMULATION
+# ASSUMPTION chosen to be plausible, not an estimate of any real system.
+
+seed: 20241105
+synthetic_year: 2024
+
+paths:
+  data_dir: data            # generated microdata (git-ignored)
+  results_dir: results      # small aggregate outputs (committed)
+  examples_dir: examples    # human-readable sample messages / bundles (committed)
+
+population:
+  n_events: 12000           # injury events (MVC + fall)
+  mechanism_share: {mvc: 0.42, fall: 0.58}
+  repeat_event_rate: 0.06   # extra events attributed to an existing person (frequent fallers)
+  race_eth_mix:             # true (latent) race/ethnicity mix, by urbanicity
+    urban: {White: 0.52, Black: 0.20, Hispanic: 0.19, Asian: 0.07, AIAN: 0.01, NHPI: 0.01}
+    rural: {White: 0.72, Black: 0.08, Hispanic: 0.11, Asian: 0.02, AIAN: 0.06, NHPI: 0.01}
+  home_county_incident_share: 0.85   # share of incidents in the patient's home county
+
+geography:
+  # Fictional counties. Codes/names are synthetic and do not refer to real places.
+  counties:
+    - {code: C01, name: "County 01 (synthetic)", urbanicity: urban, weight: 0.22, nearest_hospital: H01}
+    - {code: C02, name: "County 02 (synthetic)", urbanicity: urban, weight: 0.17, nearest_hospital: H02}
+    - {code: C03, name: "County 03 (synthetic)", urbanicity: urban, weight: 0.13, nearest_hospital: H03}
+    - {code: C04, name: "County 04 (synthetic)", urbanicity: urban, weight: 0.10, nearest_hospital: H01}
+    - {code: C05, name: "County 05 (synthetic)", urbanicity: rural, weight: 0.06, nearest_hospital: H04}
+    - {code: C06, name: "County 06 (synthetic)", urbanicity: rural, weight: 0.05, nearest_hospital: H04}
+    - {code: C07, name: "County 07 (synthetic)", urbanicity: rural, weight: 0.05, nearest_hospital: H02}
+    - {code: C08, name: "County 08 (synthetic)", urbanicity: rural, weight: 0.06, nearest_hospital: H05}
+    - {code: C09, name: "County 09 (synthetic)", urbanicity: rural, weight: 0.04, nearest_hospital: H05}
+    - {code: C10, name: "County 10 (synthetic)", urbanicity: rural, weight: 0.05, nearest_hospital: H06}
+    - {code: C11, name: "County 11 (synthetic)", urbanicity: rural, weight: 0.04, nearest_hospital: H06}
+    - {code: C12, name: "County 12 (synthetic)", urbanicity: rural, weight: 0.03, nearest_hospital: H03}
+  hospitals:
+    - {code: H01, name: "Hospital H01 (synthetic Level I trauma center)", county: C01, trauma_center: true}
+    - {code: H02, name: "Hospital H02 (synthetic)", county: C02, trauma_center: false}
+    - {code: H03, name: "Hospital H03 (synthetic)", county: C03, trauma_center: false}
+    - {code: H04, name: "Hospital H04 (synthetic critical access)", county: C05, trauma_center: false}
+    - {code: H05, name: "Hospital H05 (synthetic critical access)", county: C08, trauma_center: false}
+    - {code: H06, name: "Hospital H06 (synthetic critical access)", county: C10, trauma_center: false}
+  trauma_center: H01
+
+ems:
+  call_rate: {mvc: 0.70, fall: 0.58}          # P(911/EMS response) for minor injuries; rises with severity
+  transport_rate: {minor: 0.62, moderate: 0.90, severe: 0.98, critical: 1.0}
+  response_minutes: {urban: 8, rural: 17}     # median, lognormal
+  transport_minutes: {urban: 12, rural: 28, to_trauma_center_extra: 25}
+
+ed:
+  seek_care_without_ems: {minor: 0.55, moderate: 0.92, severe: 0.98, critical: 1.0}
+  private_arrival_delay_minutes: {mvc: 75, fall: 240}   # median, lognormal
+  registration_lag_minutes: [-5, 15]                    # ED arrival stamp relative to EMS arrival
+
+data_quality:
+  # Baseline per-record error/missingness rates, applied INDEPENDENTLY to the EMS copy and the
+  # ED copy of each person's demographics. Subgroup multipliers below create differential error.
+  ems:
+    name_typo: 0.06
+    name_variant: 0.06
+    dob_error: 0.05
+    dob_missing: 0.03
+    race_unknown: 0.12
+    race_misclass: 0.05
+    sex_missing: 0.01
+    unidentified: {minor: 0.0, moderate: 0.01, severe: 0.10, critical: 0.30}
+  ed:
+    name_typo: 0.02
+    name_variant: 0.03
+    dob_error: 0.015
+    dob_missing: 0.005
+    race_unknown: 0.07
+    race_misclass: 0.02
+    sex_missing: 0.003
+    trauma_alias: {minor: 0.0, moderate: 0.0, severe: 0.20, critical: 0.55}   # e.g. "TRAUMA, ZULU"
+  multipliers:     # multiply the rates above (capped at max_rate)
+    race_eth:
+      Hispanic: {name_typo: 1.6, name_variant: 3.0, race_unknown: 1.8, race_misclass: 3.0}
+      Asian:    {name_typo: 1.8, name_variant: 2.5, race_unknown: 1.8, race_misclass: 1.5}
+      AIAN:     {name_typo: 1.3, race_unknown: 3.0, race_misclass: 4.0, dob_error: 1.3}
+      NHPI:     {name_typo: 1.6, race_unknown: 2.5, race_misclass: 3.0}
+      Black:    {race_unknown: 1.3, race_misclass: 1.2}
+    age_group:
+      "0-17":   {dob_error: 1.5, dob_missing: 1.5}
+      "65+":    {dob_error: 1.6, dob_missing: 2.0}
+    urbanicity:
+      rural:    {name_typo: 1.3, dob_error: 1.4, dob_missing: 1.5, race_unknown: 1.3}
+    alcohol_involved: {name_typo: 1.3, dob_error: 1.8, dob_missing: 2.5}
+  max_rate: 0.9
+
+alcohol_drug:
+  base_rate: {mvc: 0.16, fall: 0.07}
+
+patterns:
+  # Each pattern applies a chain of failure stages to transported EMS→ED encounters.
+  # Stage survival is sampled with EXACT counts, so the expected deterministic recall is the
+  # product of stage pass rates (see tests/test_patterns.py regression test).
+  A_point_to_point:
+    interface_live: 0.92          # agency–hospital interface exists and is in production
+    message_delivered: 0.97       # HL7 message accepted (ACK) by hospital interface engine
+    registration_merge: 0.93      # ED registration merges the pre-admit, keeping PV1-50
+  B_hie:
+    ems_adt_sent: 0.94            # EMS system sends ADT to HIE
+    ed_adt_sent: 0.99             # ED sends ADT to HIE
+    match_window_hours: 12        # HIE keeps ED registrations open for matching this long
+    ems_message_delay_median_hours: 1.5   # ePCR completion/transmission delay (lognormal)
+    ems_message_delay_sigma: 1.4
+    time_tolerance_minutes: 120   # HIE rule: |EMS destination arrival − ED arrival|
+    writeback_success: 0.97       # HIE successfully writes UUID back into ED record
+  C_fhir_api:
+    api_enabled: 0.95             # vendor integration service enabled for agency–hospital pair
+    api_call_success: 0.985       # POST/PUT succeeds (after retries)
+    identifier_retained: 0.98     # EHR keeps the extra Encounter.identifier on later updates
+  n_examples: 3                   # example messages / bundles written per pattern
+
+linkage:
+  splink:
+    match_threshold: 0.90
+    em_blocking: [["county", "arrival_date"], ["dob"]]
+    u_max_pairs: 2000000
+    threshold_sweep: [0.5, 0.7, 0.8, 0.9, 0.95, 0.99]
+
+latency_assumptions:
+  # ASSUMPTIONS, clearly labeled: when is a linked record available for analysis?
+  deterministic_days: 0                 # UUID present at the encounter (patterns A and C)
+  hie_hours: 12                         # bounded by HIE match window (pattern B)
+  probabilistic_months_after_year_end: 18   # annual batch linkage after data year closes

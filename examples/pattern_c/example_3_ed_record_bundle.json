@@ -1,0 +1,212 @@
+{
+  "resourceType": "Bundle",
+  "id": "a03ec7b1-2931-5868-a147-083d6a9fbdf4",
+  "type": "collection",
+  "timestamp": "2024-07-19T09:21:38-05:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:3ffe35dc-1159-5617-b5f6-498fc30443ec",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "3ffe35dc-1159-5617-b5f6-498fc30443ec",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "https://ems-ed-linkage-lab.example.org/fhir/sid/H01/mrn",
+            "value": "H01M0001092"
+          }
+        ],
+        "name": [
+          {
+            "family": "Macdonald",
+            "given": [
+              "Casey"
+            ]
+          }
+        ],
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [
+              {
+                "url": "text",
+                "valueString": "Black or African American"
+              }
+            ]
+          },
+          {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [
+              {
+                "url": "text",
+                "valueString": "Not Hispanic or Latino"
+              }
+            ]
+          }
+        ],
+        "birthDate": "1973-09-16"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cbad777d-f80f-5b3e-becd-6144a85295c0",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "cbad777d-f80f-5b3e-becd-6144a85295c0",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/encounter-modeOfArrival",
+            "valueCoding": {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0430",
+              "code": "A",
+              "display": "Ambulance"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "VN",
+                  "display": "Visit number"
+                }
+              ]
+            },
+            "system": "https://ems-ed-linkage-lab.example.org/fhir/sid/H01/visit",
+            "value": "H01V0002184"
+          },
+          {
+            "use": "secondary",
+            "type": {
+              "text": "EMS patient care report UUID"
+            },
+            "system": "https://ems-ed-linkage-lab.example.org/fhir/sid/ems-pcr-uuid",
+            "value": "0025807b-7ea1-44a8-aef7-64f15c5cf315"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "emergency"
+        },
+        "subject": {
+          "reference": "urn:uuid:3ffe35dc-1159-5617-b5f6-498fc30443ec"
+        },
+        "period": {
+          "start": "2024-07-19T09:21:38-05:00"
+        },
+        "serviceProvider": {
+          "display": "Hospital H01 (synthetic)"
+        },
+        "hospitalization": {
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                "code": "home",
+                "display": "Home"
+              }
+            ],
+            "text": "Discharged home"
+          }
+        },
+        "diagnosis": [
+          {
+            "condition": {
+              "reference": "urn:uuid:26d53f6b-a2d5-56fc-b1a8-80358b3778f2"
+            },
+            "rank": 1
+          },
+          {
+            "condition": {
+              "reference": "urn:uuid:306e4a45-fe8b-5aa1-8c58-33c87c6d19e5"
+            },
+            "rank": 2
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:26d53f6b-a2d5-56fc-b1a8-80358b3778f2",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "26d53f6b-a2d5-56fc-b1a8-80358b3778f2",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "S00.83XA",
+              "display": "Contusion of other part of head, initial encounter"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:3ffe35dc-1159-5617-b5f6-498fc30443ec"
+        },
+        "encounter": {
+          "reference": "urn:uuid:cbad777d-f80f-5b3e-becd-6144a85295c0"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:306e4a45-fe8b-5aa1-8c58-33c87c6d19e5",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "306e4a45-fe8b-5aa1-8c58-33c87c6d19e5",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "W18.30XA",
+              "display": "Fall on same level, unspecified, initial encounter"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:3ffe35dc-1159-5617-b5f6-498fc30443ec"
+        },
+        "encounter": {
+          "reference": "urn:uuid:cbad777d-f80f-5b3e-becd-6144a85295c0"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "https://ems-ed-linkage-lab.example.org/tags",
+        "code": "synthetic",
+        "display": "Synthetic data — for demonstration only."
+      }
+    ]
+  }
+}

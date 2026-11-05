@@ -1,0 +1,23 @@
+data_label,link_source,mechanism,arrival,ems_triage,n,admitted,transferred,died,discharged
+Synthetic data — for demonstration only.,truth,Fall,EMS (ambulance),EMS: high-risk triage criteria,896,0.580357,0.145089,0.0424107,0.232143
+Synthetic data — for demonstration only.,truth,Fall,EMS (ambulance),EMS: no high-risk criteria,3858,0.28253,0.0772421,0.00311042,0.637118
+Synthetic data — for demonstration only.,truth,Fall,Private / walk-in,n/a (no EMS record),880,0.0909091,0.0227273,0.00113636,0.885227
+Synthetic data — for demonstration only.,truth,MVC,EMS (ambulance),EMS: high-risk triage criteria,565,0.492035,0.189381,0.0743363,0.244248
+Synthetic data — for demonstration only.,truth,MVC,EMS (ambulance),EMS: no high-risk criteria,2419,0.240182,0.0690368,0.00496073,0.685821
+Synthetic data — for demonstration only.,truth,MVC,Private / walk-in,n/a (no EMS record),591,0.153976,0.0541455,0,0.791878
+Synthetic data — for demonstration only.,det_C,Fall,EMS (ambulance),"EMS arrival, not linked",411,0.352798,0.111922,0.0145985,0.520681
+Synthetic data — for demonstration only.,det_C,Fall,EMS (ambulance),EMS: high-risk triage criteria,815,0.576687,0.153374,0.0404908,0.229448
+Synthetic data — for demonstration only.,det_C,Fall,EMS (ambulance),EMS: no high-risk criteria,3528,0.282029,0.0728458,0.00311791,0.642007
+Synthetic data — for demonstration only.,det_C,Fall,Private / walk-in,n/a (no EMS record),880,0.0909091,0.0227273,0.00113636,0.885227
+Synthetic data — for demonstration only.,det_C,MVC,EMS (ambulance),"EMS arrival, not linked",231,0.285714,0.0952381,0.012987,0.606061
+Synthetic data — for demonstration only.,det_C,MVC,EMS (ambulance),EMS: high-risk triage criteria,519,0.493256,0.186898,0.0751445,0.244701
+Synthetic data — for demonstration only.,det_C,MVC,EMS (ambulance),EMS: no high-risk criteria,2234,0.240376,0.0693823,0.00537153,0.68487
+Synthetic data — for demonstration only.,det_C,MVC,Private / walk-in,n/a (no EMS record),591,0.153976,0.0541455,0,0.791878
+Synthetic data — for demonstration only.,splink_time,Fall,EMS (ambulance),"EMS arrival, not linked",505,0.681188,0.160396,0.0455446,0.112871
+Synthetic data — for demonstration only.,splink_time,Fall,EMS (ambulance),EMS: high-risk triage criteria,599,0.517529,0.136895,0.0317195,0.313856
+Synthetic data — for demonstration only.,splink_time,Fall,EMS (ambulance),EMS: no high-risk criteria,3650,0.261918,0.0726027,0.00219178,0.663288
+Synthetic data — for demonstration only.,splink_time,Fall,Private / walk-in,n/a (no EMS record),880,0.0909091,0.0227273,0.00113636,0.885227
+Synthetic data — for demonstration only.,splink_time,MVC,EMS (ambulance),"EMS arrival, not linked",343,0.556851,0.233236,0.090379,0.119534
+Synthetic data — for demonstration only.,splink_time,MVC,EMS (ambulance),EMS: high-risk triage criteria,337,0.459941,0.136499,0.0385757,0.364985
+Synthetic data — for demonstration only.,splink_time,MVC,EMS (ambulance),EMS: no high-risk criteria,2304,0.222656,0.0642361,0.00434028,0.708767
+Synthetic data — for demonstration only.,splink_time,MVC,Private / walk-in,n/a (no EMS record),591,0.153976,0.0541455,0,0.791878

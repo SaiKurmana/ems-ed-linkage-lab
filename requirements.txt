@@ -1,0 +1,20 @@
+# Pinned for reproducible, deterministic outputs (Python 3.11).
+duckdb==2.0.0
+splink==5.0.0
+hl7==0.4.5
+hl7apy==1.3.5   # used in tests for strict v2.5.1 structure validation
+# fhir.resources 6.1.0 is the last release whose default models are FHIR R4 (4.0.1);
+# later releases default to R4B / R5. It requires pydantic v1.
+fhir.resources==6.1.0
+pydantic==1.10.27
+email-validator==2.3.0
+faker==40.44.0
+numpy==2.4.6
+pandas==3.1.1
+pyarrow==26.0.1
+pyyaml==6.0.3
+plotly==7.1.0
+streamlit==1.66.1
+markdown==3.11.2
+pytest==9.2.0
+ruff==0.17.3

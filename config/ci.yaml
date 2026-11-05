@@ -1,0 +1,7 @@
+# Small, fast configuration used by CI and tests. Inherits everything else from default.yaml.
+extends: default.yaml
+population:
+  n_events: 1500
+linkage:
+  splink:
+    u_max_pairs: 300000
