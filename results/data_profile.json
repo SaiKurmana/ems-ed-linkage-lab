@@ -1,0 +1,132 @@
+{
+  "counts": {
+    "ed_encounters": 9209,
+    "ed_without_ems": 1471,
+    "ems_not_transported": 1829,
+    "ems_records": 9567,
+    "ems_transported": 7738,
+    "fall_events": 7314,
+    "injury_events": 12000,
+    "mvc_events": 4686,
+    "persons": 11280,
+    "true_links": 7738
+  },
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "ed_data_quality_by_race_eth": {
+    "AIAN": {
+      "any_name_issue": 0.094406,
+      "dob_issue": 0.024476,
+      "n": 286,
+      "race_unknown_or_misclassified": 0.272727
+    },
+    "Asian": {
+      "any_name_issue": 0.197581,
+      "dob_issue": 0.02621,
+      "n": 496,
+      "race_unknown_or_misclassified": 0.118952
+    },
+    "Black": {
+      "any_name_issue": 0.116312,
+      "dob_issue": 0.015603,
+      "n": 1410,
+      "race_unknown_or_misclassified": 0.114184
+    },
+    "Hispanic": {
+      "any_name_issue": 0.174614,
+      "dob_issue": 0.022163,
+      "n": 1489,
+      "race_unknown_or_misclassified": 0.196105
+    },
+    "NHPI": {
+      "any_name_issue": 0.116279,
+      "dob_issue": 0.034884,
+      "n": 86,
+      "race_unknown_or_misclassified": 0.267442
+    },
+    "White": {
+      "any_name_issue": 0.117053,
+      "dob_issue": 0.026461,
+      "n": 5442,
+      "race_unknown_or_misclassified": 0.09004
+    }
+  },
+  "ems_data_quality_by_age_group": {
+    "0-17": {
+      "any_name_issue": 0.17284,
+      "dob_issue": 0.141289,
+      "n": 729,
+      "race_unknown_or_misclassified": 0.260631
+    },
+    "18-44": {
+      "any_name_issue": 0.172414,
+      "dob_issue": 0.110632,
+      "n": 2784,
+      "race_unknown_or_misclassified": 0.229526
+    },
+    "45-64": {
+      "any_name_issue": 0.177851,
+      "dob_issue": 0.106383,
+      "n": 1833,
+      "race_unknown_or_misclassified": 0.234043
+    },
+    "65+": {
+      "any_name_issue": 0.17792,
+      "dob_issue": 0.156124,
+      "n": 4221,
+      "race_unknown_or_misclassified": 0.235963
+    }
+  },
+  "ems_data_quality_by_race_eth": {
+    "AIAN": {
+      "any_name_issue": 0.132686,
+      "dob_issue": 0.174757,
+      "n": 309,
+      "race_unknown_or_misclassified": 0.543689
+    },
+    "Asian": {
+      "any_name_issue": 0.284333,
+      "dob_issue": 0.117988,
+      "n": 517,
+      "race_unknown_or_misclassified": 0.274662
+    },
+    "Black": {
+      "any_name_issue": 0.146795,
+      "dob_issue": 0.133701,
+      "n": 1451,
+      "race_unknown_or_misclassified": 0.22674
+    },
+    "Hispanic": {
+      "any_name_issue": 0.280795,
+      "dob_issue": 0.118543,
+      "n": 1510,
+      "race_unknown_or_misclassified": 0.363576
+    },
+    "NHPI": {
+      "any_name_issue": 0.235955,
+      "dob_issue": 0.168539,
+      "n": 89,
+      "race_unknown_or_misclassified": 0.438202
+    },
+    "White": {
+      "any_name_issue": 0.147074,
+      "dob_issue": 0.133896,
+      "n": 5691,
+      "race_unknown_or_misclassified": 0.18046
+    }
+  },
+  "ems_data_quality_by_urbanicity": {
+    "rural": {
+      "any_name_issue": 0.17274,
+      "dob_issue": 0.162726,
+      "n": 3595,
+      "race_unknown_or_misclassified": 0.258414
+    },
+    "urban": {
+      "any_name_issue": 0.17783,
+      "dob_issue": 0.113865,
+      "n": 5972,
+      "race_unknown_or_misclassified": 0.221869
+    }
+  },
+  "seed": 20241105
+}

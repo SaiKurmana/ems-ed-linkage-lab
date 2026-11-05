@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+# Generated synthetic microdata (rebuild with `make data simulate link`)
+data/
+# Built static site (rebuild with `make site`)
+_site/
+*.duckdb
+*.duckdb.wal
+.DS_Store
