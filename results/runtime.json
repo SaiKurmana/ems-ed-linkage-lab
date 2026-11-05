@@ -2,11 +2,11 @@
   "disclaimer": "Synthetic data — for demonstration only.",
   "note": "Wall-clock seconds on the machine that last ran `make link`; varies by machine.",
   "seconds": {
-    "det_A": 0.07,
-    "det_B": 0.05,
+    "det_A": 0.06,
+    "det_B": 0.07,
     "det_C": 0.05,
-    "hybrid_C": 4.36,
-    "splink_date": 2.91,
-    "splink_time": 4.2
+    "hybrid_C": 5.31,
+    "splink_date": 3.21,
+    "splink_time": 5.16
   }
 }

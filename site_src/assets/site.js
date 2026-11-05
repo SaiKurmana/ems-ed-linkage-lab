@@ -15,6 +15,7 @@
     if (!window.Plotly) return;
     const dark = isDark(), map = dark ? DARK : LIGHT, text = css("--text"), text2 = css("--text-2");
     const grid = dark ? "rgba(195,194,183,0.16)" : "rgba(82,81,78,0.18)";
+    const conn = dark ? "rgba(195,194,183,0.38)" : "rgba(82,81,78,0.35)";  // dumbbell connectors
     document.querySelectorAll(".js-plotly-plot").forEach(function (gd) {
       const colors = gd.data.map(function (tr) {
         const c = (tr.marker && tr.marker.color) || (tr.line && tr.line.color);
@@ -22,18 +23,24 @@
       });
       gd.data.forEach(function (tr, i) {
         if (typeof colors[i] !== "string") return;
+        if (tr.hoverinfo === "skip" && tr.line) { window.Plotly.restyle(gd, {"line.color": conn}, [i]); return; }
         const upd = {};
-        if (tr.marker) { upd["marker.color"] = colors[i]; upd["marker.line.color"] = css("--surface"); }
+        if (tr.marker) {
+          upd["marker.color"] = colors[i];
+          const open = String(tr.marker.symbol || "").indexOf("open") !== -1;
+          upd["marker.line.color"] = open ? colors[i] : css("--surface");  // open symbols draw with their line
+        }
         if (tr.line) upd["line.color"] = colors[i];
         if (tr.textfont) upd["textfont.color"] = text2;
         window.Plotly.restyle(gd, upd, [i]);
       });
-      window.Plotly.relayout(gd, {
-        "title.font.color": text, "font.color": text2, "legend.font.color": text2,
-        "xaxis.gridcolor": grid, "yaxis.gridcolor": grid, "xaxis.linecolor": grid, "yaxis.linecolor": grid,
-        "xaxis.tickfont.color": text2, "yaxis.tickfont.color": text2,
-        "xaxis.title.font.color": text2, "yaxis.title.font.color": text2,
+      const lay = { "title.font.color": text, "font.color": text2, "legend.font.color": text2 };
+      Object.keys(gd.layout).filter(function (k) { return /^[xy]axis\d*$/.test(k); }).forEach(function (k) {
+        lay[k + ".gridcolor"] = grid; lay[k + ".linecolor"] = grid;
+        lay[k + ".tickfont.color"] = text2; lay[k + ".title.font.color"] = text2;
       });
+      (gd.layout.annotations || []).forEach(function (a, j) { lay["annotations[" + j + "].font.color"] = text2; });
+      window.Plotly.relayout(gd, lay);
     });
   }
   window.__themeCharts = themeCharts;

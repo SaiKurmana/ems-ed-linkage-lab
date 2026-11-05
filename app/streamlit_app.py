@@ -259,7 +259,9 @@ with tab3:
     plot(charts.subgroup_dots(sub, dim, methods=methods))
     piv = sub[sub.dimension == dim].pivot_table(index="group", columns="method", values="recall")
     gap = (piv.max() - piv.min()).rename("max − min recall gap").to_frame().T
-    st.markdown("**Recall gap across groups (percentage points × 100)**")
+    st.markdown(
+        "**Recall gap across groups** (max − min recall, as a fraction; × 100 = percentage points)"
+    )
     st.dataframe(gap.style.format("{:.3f}"), width="stretch")
     st.dataframe(piv.style.format("{:.3f}"), width="stretch")
 

@@ -256,7 +256,7 @@ def carry_gap_dumbbell(tbl: pd.DataFrame, summary: dict) -> go.Figure:
                 x=[r, u],
                 y=[lab, lab],
                 mode="lines",
-                line={"color": GRID, "width": 3},
+                line={"color": "rgba(82,81,78,0.35)", "width": 3},
                 showlegend=False,
                 hoverinfo="skip",
                 row=1,
@@ -274,7 +274,11 @@ def carry_gap_dumbbell(tbl: pd.DataFrame, summary: dict) -> go.Figure:
                 marker={
                     "size": 11,
                     "color": URBANICITY_COLOR[urb],
-                    "line": {"width": 2, "color": "#fcfcfb"},
+                    # shape as secondary encoding so overlapping urban/rural points stay visible
+                    "symbol": "circle-open" if urb == "urban" else "diamond",
+                    "line": {"width": 2.5, "color": URBANICITY_COLOR[urb]}
+                    if urb == "urban"
+                    else {"width": 1.5, "color": "#fcfcfb"},
                 },
                 customdata=dd.n_true_links,
                 hovertemplate="%{y} · "
