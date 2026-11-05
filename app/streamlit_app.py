@@ -246,7 +246,17 @@ with tab3:
     dim = st.selectbox(
         "Subgroup dimension", list(charts.GROUP_LABEL), format_func=charts.GROUP_LABEL.get
     )
-    plot(charts.subgroup_dots(sub, dim))
+    compare = st.radio(
+        "Methods to compare",
+        ["Headline: UUID (C) · Splink · Hybrid", "Splink: arrival time vs date only"],
+        horizontal=True,
+    )
+    methods = (
+        charts.HEADLINE_METHODS
+        if compare.startswith("Headline")
+        else ("splink_time", "splink_date")
+    )
+    plot(charts.subgroup_dots(sub, dim, methods=methods))
     piv = sub[sub.dimension == dim].pivot_table(index="group", columns="method", values="recall")
     gap = (piv.max() - piv.min()).rename("max − min recall gap").to_frame().T
     st.markdown("**Recall gap across groups (percentage points × 100)**")
@@ -295,14 +305,9 @@ with tab4:
         st.dataframe(df, hide_index=True, width="stretch")
         if qid == "q2_outcomes_by_arrival":
             st.caption("⚠️ " + summ["confounding_note"])
-    st.markdown("#### Data latency (assumption)")
-    st.caption(
-        "Deterministic links exist at the encounter; probabilistic linkage is modelled as an annual "
-        "batch run some months after the data year closes. Configurable in "
-        "`config/default.yaml → latency_assumptions`. This is an ASSUMPTION, not a measurement."
+    st.markdown(
+        "#### Data latency — illustrative, configurable assumption (12 / 18 / 24 / 36 months)"
     )
-    plot(charts.latency(load_csv("latency.csv")))
-    st.markdown("#### Latency sensitivity (illustrative assumption: 12 / 18 / 24 / 36 months)")
     st.caption(
         "Probabilistic links are assumed to become available in an annual batch N months after the "
         "data year closes. No verified public source gives a typical end-to-end EMS–ED linkage lag; "

@@ -57,6 +57,7 @@ Use one row per point. Copy the table into partner discussions and fill in the l
 
 | # | Facilitator / barrier | Evidence | Status | Partner notes | Action |
 |---|---|---|---|---|---|
-| E1 | **F:** UUID carry did not depend on demographics in the simulation, so recall was flat across groups | subgroup recall (det_C 0.905–0.987) | [Simulation] — by construction; [Validate] real carry parity (e.g. rural agencies may be connected later) | | |
+| E1 | **F:** UUID carry did not depend on demographics in the baseline simulation, so recall was flat across groups | subgroup recall (det_C 0.905–0.987, synthetic) | [Simulation] — by construction; [Validate] real carry parity | | |
+| E1b | **B:** If rural / small agencies are connected later or less reliably, UUID-only recall becomes unequal (sensitivity scenario: rural 0.666 vs urban 0.917 for Pattern C, synthetic) — a hybrid fallback narrowed the gap to 2.7 pp | `results/sensitivity/summary.json` | [Simulation] — invented rates; [Validate] real onboarding order and interface reliability | | |
 | E2 | **B:** Probabilistic recall collapses for critically injured patients (Splink 0.31 vs UUID 0.92) because of aliases / unknown patients | `results/subgroup_recall.csv` | [Simulation] + [Validate] alias practices | | |
 | E3 | **B:** Probabilistic recall gaps by race/ethnicity were small with precise arrival times but widened under date-only matching (Asian 0.79 vs White 0.89) | subgroup recall | [Simulation] | | |

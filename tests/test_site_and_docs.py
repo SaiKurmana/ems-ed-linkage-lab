@@ -54,3 +54,23 @@ def test_standards_references_present():
 def test_every_doc_labels_synthetic():
     for key, _ in DOCS:
         assert DISCLAIMER in (REPO / "docs" / f"{key}.md").read_text(encoding="utf-8"), key
+
+
+def test_readme_sensitivity_and_latency_tables_match_results():
+    from site_src.tables import latency_rows, sensitivity_rows
+
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    assert sensitivity_rows() in readme
+    assert latency_rows() in readme
+
+
+def test_pydantic_pinned_below_2_for_fhir_resources():
+    import re
+
+    import pydantic
+
+    req = (REPO / "requirements.txt").read_text(encoding="utf-8")
+    pin = re.search(r"^pydantic==(\d+)\.", req, flags=re.M)
+    assert pin and int(pin.group(1)) < 2
+    assert re.search(r"^fhir\.resources==6\.1\.0$", req, flags=re.M)
+    assert pydantic.VERSION.startswith("1.")

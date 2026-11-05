@@ -162,6 +162,20 @@ the state EMS office or HIE.
 All 37 codes in `synth/codes.py` (4 MVC and 6 fall external-cause codes; 27 injury diagnosis codes)
 were looked up in that file; descriptions are copied verbatim.
 
+## Data release timing (context for latency assumptions)
+
+These verified statements describe when **source data** become available. They are *not*
+end-to-end EMS–ED linkage lags; no verified public source for a typical linkage lag was found, so
+the simulation's 18-month default (and 12/18/24/36 sensitivity range) remains an illustrative assumption.
+
+| Source | Verified statement | URL |
+|---|---|---|
+| HCUP Frequently Asked Questions (AHRQ) | "HCUP's State databases (SID, SASD, and SEDD) are released on a rolling basis—typically beginning 9 to 12 months following the end of a calendar year." | <https://hcup-us.ahrq.gov/tech_assist/faq.jsp> |
+| HCUP Frequently Asked Questions (AHRQ) | "The NIS, NEDS, NRD, and NASS, are released annually, approximately 18 to 22 months following the end of a calendar year." | <https://hcup-us.ahrq.gov/tech_assist/faq.jsp> |
+| HCUP home page | "2024 HCUP nationwide databases are now available through the HCUP Central Distributor Online Reporting System (10/28/2026)" | <https://hcup-us.ahrq.gov/home.jsp> |
+| NEMSIS Monthly Report, June 2025 | announces "the availability of the 2024 Public-Release Research Dataset" | <https://nemsis.org/wp-content/uploads/2025/07/Monthly-Report-June-2025.pdf> |
+| NEMSIS 2024 Public Release Research Dataset FAQ | "the public data is only available through the data cube with approximately a 2-week lag or the research dataset produced annually." | <https://nemsis.org/wp-content/uploads/2025/06/Research-dataset-FAQ-2024-1.pdf> |
+
 ## Software
 
 | Library | Version | Role |

@@ -19,6 +19,7 @@ import yaml
 from plotly.offline import get_plotlyjs
 
 from common import AFFILIATION, DISCLAIMER, EMS_UUID_SYSTEM, charts
+from site_src import tables
 
 REPO = Path(__file__).resolve().parents[1]
 SRC = Path(__file__).resolve().parent
@@ -184,11 +185,24 @@ def results_table(metrics: dict) -> str:
             f'<td class="num">{m["f1"]:.3f}</td><td class="num">{m["false_match_rate"]:.3f}</td></tr>'
         )
     return (
-        '<div class="table-wrap"><table><caption class="sr-only">Linkage results (synthetic)</caption>'
+        '<div class="table-wrap"><table><caption class="sr-only">Linkage results (synthetic data)</caption>'
         '<thead><tr><th>Method</th><th class="num">Precision</th><th class="num">Recall</th>'
         '<th class="num">F1</th><th class="num">False-match rate</th></tr></thead><tbody>'
         + "".join(rows)
         + "</tbody></table></div>"
+    )
+
+
+def html_table(header: list[str], rows: list[list[str]], caption: str) -> str:
+    num = ' class="num"'
+    th = "".join(f"<th{num if i else ''}>{esc(h)}</th>" for i, h in enumerate(header))
+    body = "".join(
+        "<tr>" + "".join(f"<td{num if i else ''}>{esc(v)}</td>" for i, v in enumerate(r)) + "</tr>"
+        for r in rows
+    )
+    return (
+        f'<p class="cap">{esc(caption)}</p><div class="table-wrap"><table><thead><tr>{th}</tr></thead>'
+        f"<tbody>{body}</tbody></table></div>"
     )
 
 
@@ -246,7 +260,39 @@ def build_index(cfg: dict, out: Path) -> None:
     plog = json.loads((rd / "pattern_logs.json").read_text())["patterns"]
     summ = json.loads((rd / "analysis" / "summary.json").read_text())
     sub = pd.read_csv(rd / "subgroup_recall.csv")
-    lat = pd.read_csv(rd / "latency.csv")
+    lat_sens = pd.read_csv(rd / "latency_sensitivity.csv")
+    carry = pd.read_csv(rd / "sensitivity" / "carry_by_urbanicity.csv")
+    sens = json.loads((rd / "sensitivity" / "summary.json").read_text())
+    sens_table = html_table(
+        [
+            "Method",
+            "Baseline urban",
+            "Baseline rural",
+            "Scenario urban",
+            "Scenario rural",
+            "Scenario gap (pp)",
+        ],
+        [
+            [
+                r["method"],
+                f"{r['base_urban']:.3f}",
+                f"{r['base_rural']:.3f}",
+                f"{r['sc_urban']:.3f}",
+                f"{r['sc_rural']:.3f}",
+                f"{r['sc_gap_pp']:+.1f}",
+            ]
+            for r in tables.sensitivity_records()
+        ],
+        "Recall by EMS agency urbanicity (synthetic data — for demonstration only)",
+    )
+    lat_table = html_table(
+        ["Method (assumed lag)"] + [f"{mo} mo" for mo in tables.MILESTONES],
+        [
+            [r["label"]] + [f"{r[mo]:.1%}" for mo in tables.MILESTONES]
+            for r in tables.latency_records()
+        ],
+        "Share of true links usable, by months since the encounter (synthetic data — for demonstration only)",
+    )
     m = lm["methods"]
     sev = sub[sub.dimension == "severity"].pivot_table(
         index="group", columns="method", values="recall"
@@ -283,10 +329,33 @@ def build_index(cfg: dict, out: Path) -> None:
   <div class="cta"><a class="btn primary" href="#results">See the results</a>{app_link}
   <a class="btn" href="{esc(cfg["repo_url"])}">View source</a></div>
   <div class="kpis">
-    <div class="kpi"><div class="v">{c["injury_events"]:,}</div><div class="l">synthetic injury events</div></div>
-    <div class="kpi"><div class="v">{c["ems_records"]:,}</div><div class="l">EMS ePCR records</div></div>
-    <div class="kpi"><div class="v">{c["ed_encounters"]:,}</div><div class="l">ED encounters</div></div>
-    <div class="kpi"><div class="v">{c["true_links"]:,}</div><div class="l">true EMS→ED links</div></div>
+    <div class="kpi"><div class="v">{c["injury_events"]:,}</div><div class="l">injury events (synthetic)</div></div>
+    <div class="kpi"><div class="v">{c["ems_records"]:,}</div><div class="l">EMS ePCR records (synthetic)</div></div>
+    <div class="kpi"><div class="v">{c["ed_encounters"]:,}</div><div class="l">ED encounters (synthetic)</div></div>
+    <div class="kpi"><div class="v">{c["true_links"]:,}</div><div class="l">true EMS→ED links (synthetic)</div></div>
+  </div>
+</section>
+
+<section id="takeaway">
+  <h2>Practical takeaway</h2>
+  <p class="lede" style="font-size:18px"><strong>Carry the EMS UUID into the ED record, and keep probabilistic
+  matching as a fallback.</strong> UUID first, probabilistic matching only for what the UUID missed.</p>
+  <div class="grid">
+    <div class="card"><h3>Hybrid links almost everything</h3>
+    <p class="big">{m["hybrid_C"]["recall"]:.1%} <span class="syn">synthetic</span></p>
+    <p>of true EMS→ED transports linked at {m["hybrid_C"]["precision"]:.1%} precision — vs
+    {m["det_C"]["recall"]:.1%} for the UUID alone (Pattern C) and {m["splink_time"]["recall"]:.1%} for Splink alone
+    <span class="syn">synthetic</span>.</p></div>
+    <div class="card"><h3>Probabilistic alone misses the sickest</h3>
+    <p class="big">{sev.loc["critical", "splink_time"]:.1%} <span class="syn">synthetic</span></p>
+    <p>of <strong>critical</strong>-injury transports linked by Splink, vs {sev.loc["critical", "det_C"]:.1%} by the UUID
+    and {sev.loc["critical", "hybrid_C"]:.1%} by the hybrid <span class="syn">synthetic</span> — unidentified patients and
+    trauma aliases leave nothing to match on.</p></div>
+    <div class="card"><h3>…which shifts the answers</h3>
+    <p class="big">{h["splink_time"]["high_risk_triage_admit_transfer_or_died"]:.1%} vs {h["truth"]["high_risk_triage_admit_transfer_or_died"]:.1%} <span class="syn">synthetic</span></p>
+    <p>admitted, transferred or died among high-risk field-triage patients with Splink links vs ground truth;
+    hybrid {h["hybrid_C"]["high_risk_triage_admit_transfer_or_died"]:.1%}, UUID {h["det_C"]["high_risk_triage_admit_transfer_or_died"]:.1%}
+    <span class="syn">synthetic, descriptive demonstration</span>.</p></div>
   </div>
 </section>
 
@@ -313,13 +382,13 @@ def build_index(cfg: dict, out: Path) -> None:
   <div class="grid" style="margin-top:16px">
     <div class="card"><h3>A · Point-to-point HL7 v2</h3><p>ePCR → hospital <code>ADT^A05</code>; the UUID lands in
     <code>PV1-50</code> (Alternate Visit ID) under assigning authority <code>EMSUUID</code>.</p>
-    <p>Simulated carry rate: <strong>{plog["A"]["observed_carry_rate"]:.1%}</strong></p></div>
+    <p>Simulated carry rate: <strong>{plog["A"]["observed_carry_rate"]:.1%}</strong> <span class="syn">synthetic</span></p></div>
     <div class="card"><h3>B · HIE intermediary</h3><p>EMS and ED <code>ADT^A04</code> → HIE matcher → UUID written
     back with <code>ADT^A08</code>. Timing windows and matching cause misses.</p>
-    <p>Simulated carry rate: <strong>{plog["B"]["observed_carry_rate"]:.1%}</strong></p></div>
+    <p>Simulated carry rate: <strong>{plog["B"]["observed_carry_rate"]:.1%}</strong> <span class="syn">synthetic</span></p></div>
     <div class="card"><h3>C · FHIR R4 API</h3><p>Integration service PUTs the ED <code>Encounter</code> with an
     additional <code>identifier</code> in its own system URI; bundles validated with fhir.resources.</p>
-    <p>Simulated carry rate: <strong>{plog["C"]["observed_carry_rate"]:.1%}</strong></p></div>
+    <p>Simulated carry rate: <strong>{plog["C"]["observed_carry_rate"]:.1%}</strong> <span class="syn">synthetic</span></p></div>
   </div>
   <h3>Where the UUID lives — Pattern A (hospital ADT^A04)</h3>
   <pre>{a_ex}</pre>
@@ -330,32 +399,42 @@ def build_index(cfg: dict, out: Path) -> None:
 </section>
 
 <section id="results">
-  <h2>Headline linkage results</h2>
-  <p>Evaluated against {lm["n_true_links"]:,} true EMS→ED transport links (Splink threshold
-  {lm["match_threshold"]}). False-match rate = share of declared links that are wrong.</p>
+  <h2>Linkage results</h2>
+  <p><span class="syn">Synthetic data — for demonstration only.</span> Evaluated against {lm["n_true_links"]:,}
+  true EMS→ED transport links (Splink threshold {lm["match_threshold"]}). False-match rate = share of declared
+  links that are wrong.</p>
   {results_table(m)}
-  <div class="grid" style="margin-top:16px">
-    <div class="card"><h3>Exact, but only if it arrives</h3><p>UUID joins never produce false matches here
-    (precision 1.000); their recall equals the share of encounters the integration actually delivered.</p></div>
-    <div class="card"><h3>Probabilistic misses the sickest</h3><p>Splink recall for <strong>critical</strong> injuries:
-    <strong>{sev.loc["critical", "splink_time"]:.1%}</strong> vs <strong>{sev.loc["critical", "det_C"]:.1%}</strong>
-    with the Pattern C UUID — trauma aliases and “unknown” patients have nothing to match on.</p></div>
-    <div class="card"><h3>Better together</h3><p>UUID first, Splink for the rest:
-    recall <strong>{m["hybrid_C"]["recall"]:.1%}</strong>, precision <strong>{m["hybrid_C"]["precision"]:.1%}</strong>.</p></div>
-  </div>
   {fig_html(charts.scoreboard(m), "fig-scoreboard")}
   {fig_html(charts.subgroup_dots(sub, "severity"), "fig-severity")}
-  {fig_html(charts.subgroup_dots(sub, "race_eth"), "fig-race")}
-  <p class="note">How estimates move with the linkage method (demonstration): among EMS patients with
-  high-risk field-triage criteria, the share admitted, transferred or died is
+  <p class="note">How estimates move with the linkage method (descriptive demonstration, synthetic data): among
+  EMS patients with high-risk field-triage criteria, the share admitted, transferred or died is
   <strong>{h["truth"]["high_risk_triage_admit_transfer_or_died"]:.1%}</strong> with ground-truth links,
+  <strong>{h["hybrid_C"]["high_risk_triage_admit_transfer_or_died"]:.1%}</strong> with hybrid links,
   <strong>{h["det_C"]["high_risk_triage_admit_transfer_or_died"]:.1%}</strong> with UUID links and
   <strong>{h["splink_time"]["high_risk_triage_admit_transfer_or_died"]:.1%}</strong> with Splink links —
   because the records probabilistic matching drops are not missing at random.</p>
-  {fig_html(charts.latency(lat), "fig-latency")}
-  <p>Latency is a <strong>labelled assumption</strong> (deterministic links at the encounter; probabilistic
-  linkage as an annual batch {cfg.get("_prob_lag", 18)} months after the data year closes), configurable in
-  <code>config/default.yaml</code>.</p>
+  {fig_html(charts.subgroup_dots(sub, "race_eth"), "fig-race")}
+
+  <h3 id="sensitivity">Does flat recall hold? Sensitivity check</h3>
+  <p>The main result assumes UUID carry fails <strong>at random</strong>. The named scenario
+  <code>rural_small_agency_carry_gap</code> assumes — an <strong>invented, configurable assumption</strong> — that
+  agencies in rural counties (standing in for small agencies) are less often connected and less reliable.</p>
+  {sens_table}
+  {fig_html(charts.carry_gap_dumbbell(carry, sens["scenarios"]), "fig-carry-gap")}
+  <p>Baseline gaps are ≤ 0.6 percentage points, but only because failures were random by construction. In the
+  scenario, UUID-only recall opens a 25–30 pp rural gap (Patterns A and C); the hybrid narrows it to
+  {sens["scenarios"]["rural_small_agency_carry_gap"]["recall"]["hybrid_C"]["urban_minus_rural_pp"]:.1f} pp
+  <span class="syn">synthetic</span>.</p>
+
+  <h3 id="latency">Latency — an illustrative, configurable assumption</h3>
+  <p>UUID links exist at the encounter. Probabilistic linkage is modelled as an annual batch <em>N</em> months after
+  the data year closes (default {cfg.get("_prob_lag", 18)}; shown for 12 / 18 / 24 / 36). No verified public source
+  states a typical end-to-end EMS–ED linkage lag. For context, HCUP reports its State databases are released
+  “typically beginning 9 to 12 months following the end of a calendar year”
+  (<a href="https://hcup-us.ahrq.gov/tech_assist/faq.jsp">HCUP FAQ</a>;
+  <a href="docs/standards_references.html#data-release-timing-context-for-latency-assumptions">more sources</a>).</p>
+  {lat_table}
+  {fig_html(charts.latency_sensitivity(lat_sens), "fig-latency-sens")}
 </section>
 
 <section id="app">

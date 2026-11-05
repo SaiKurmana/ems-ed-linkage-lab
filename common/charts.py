@@ -19,6 +19,7 @@ LIGHT = {
     "yellow": "#eda100",
     "magenta": "#e87ba4",
     "green": "#008300",
+    "violet": "#6250d6",
 }
 DARK = {
     "#2a78d6": "#3987e5",
@@ -27,25 +28,30 @@ DARK = {
     "#eda100": "#c98500",
     "#e87ba4": "#d55181",
     "#008300": "#008300",
+    "#6250d6": "#9085e9",
 }
 TEXT, TEXT_2, GRID = "#0b0b0b", "#52514e", "rgba(82,81,78,0.18)"
 
+# Fixed method -> slot mapping. The three headline methods take slots 1-3, the only slots validated
+# for ALL pairs in both modes (dot plots, small multiples). Never show det_A/det_B/splink_date in
+# the same dot plot as the headline three; Splink time vs date (blue/green) is validated as a pair.
 METHOD_COLOR = {
-    "det_A": LIGHT["blue"],
-    "det_B": LIGHT["orange"],
-    "det_C": LIGHT["aqua"],
-    "splink_time": LIGHT["yellow"],
-    "splink_date": LIGHT["magenta"],
-    "hybrid_C": LIGHT["green"],
+    "splink_time": LIGHT["blue"],
+    "det_C": LIGHT["orange"],
+    "hybrid_C": LIGHT["aqua"],
+    "det_A": LIGHT["yellow"],
+    "det_B": LIGHT["magenta"],
+    "splink_date": LIGHT["green"],
 }
 METHOD_SHORT = {
+    "hybrid_C": "Hybrid (C + Splink)",
     "det_A": "UUID · A (HL7 v2)",
     "det_B": "UUID · B (HIE)",
     "det_C": "UUID · C (FHIR)",
     "splink_time": "Splink (time)",
     "splink_date": "Splink (date only)",
-    "hybrid_C": "Hybrid (C + Splink)",
 }
+HEADLINE_METHODS = ("det_C", "splink_time", "hybrid_C")
 GROUP_LABEL = {
     "race_eth": "Race / ethnicity (true)",
     "age_group": "Age group",
@@ -61,6 +67,7 @@ GROUP_ORDER = {
 
 
 def _layout(fig: go.Figure, title: str, height: int = 380, **kw) -> go.Figure:
+    """Shared layout. Charts with an x-axis title get their legend pushed below it."""
     fig.update_layout(
         title={
             "text": f"{title}<br><sup>{DISCLAIMER}</sup>",
@@ -99,13 +106,15 @@ def _layout(fig: go.Figure, title: str, height: int = 380, **kw) -> go.Figure:
     }
     fig.update_xaxes(**axis)
     fig.update_yaxes(**axis)
+    if any(getattr(ax.title, "text", None) for ax in (fig.layout.xaxis,)):
+        fig.update_layout(legend={"y": -0.42}, xaxis={"title": {"standoff": 8}})
     return fig
 
 
 def scoreboard(metrics: dict) -> go.Figure:
     order = [m for m in METHOD_SHORT if m in metrics]
     fig = go.Figure()
-    for metric, color in (("precision", LIGHT["blue"]), ("recall", LIGHT["orange"])):
+    for metric, color in (("precision", LIGHT["violet"]), ("recall", LIGHT["yellow"])):
         vals = [metrics[m][metric] for m in order]
         fig.add_bar(
             y=[METHOD_SHORT[m] for m in order],
@@ -123,9 +132,7 @@ def scoreboard(metrics: dict) -> go.Figure:
     return _layout(fig, "Precision and recall by linkage method", height=430, barmode="group")
 
 
-def subgroup_dots(
-    sub: pd.DataFrame, dimension: str, methods=("det_C", "splink_time", "splink_date")
-) -> go.Figure:
+def subgroup_dots(sub: pd.DataFrame, dimension: str, methods=HEADLINE_METHODS) -> go.Figure:
     d = sub[(sub.dimension == dimension) & (sub.method.isin(methods))]
     groups = [g for g in GROUP_ORDER.get(dimension, sorted(d.group.unique())) if g in set(d.group)]
     fig = go.Figure()
@@ -151,28 +158,6 @@ def subgroup_dots(
     )
 
 
-def latency(lat: pd.DataFrame) -> go.Figure:
-    fig = go.Figure()
-    for m in [x for x in METHOD_SHORT if x in set(lat.method)]:
-        d = lat[lat.method == m]
-        fig.add_scatter(
-            x=d.months_since_encounter,
-            y=d.share_of_true_links_available,
-            mode="lines",
-            name=METHOD_SHORT[m],
-            line={"width": 2, "color": METHOD_COLOR[m], "shape": "hv"},
-            hovertemplate=METHOD_SHORT[m] + "<br>month %{x}: %{y:.1%}<extra></extra>",
-        )
-    fig.update_xaxes(title="Months since the encounter", dtick=6)
-    fig.update_yaxes(title="Share of true links available", tickformat=".0%", range=[0, 1.02])
-    return _layout(
-        fig,
-        "When can a linked record be analysed? (latency ASSUMPTIONS)",
-        height=400,
-        hovermode="x unified",
-    )
-
-
 def funnel(pattern_logs: dict) -> go.Figure:
     stages = {
         "A": [
@@ -188,19 +173,32 @@ def funnel(pattern_logs: dict) -> go.Figure:
             ("Identifier retained", "identifier_retained"),
         ],
     }
-    fig = go.Figure()
-    for k, color in (("A", METHOD_COLOR["det_A"]), ("C", METHOD_COLOR["det_C"])):
+    from plotly.subplots import make_subplots
+
+    # small multiples: one series per panel, so each pattern keeps its own identity colour
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        shared_yaxes=True,
+        subplot_titles=["Pattern A (HL7 v2)", "Pattern C (FHIR API)"],
+    )
+    for j, (k, color) in enumerate((("A", METHOD_COLOR["det_A"]), ("C", METHOD_COLOR["det_C"])), 1):
         log = pattern_logs[k]
         fig.add_bar(
             x=[s[0] for s in stages[k]],
             y=[log[s[1]] for s in stages[k]],
             name=f"Pattern {k}",
+            showlegend=False,
             marker={"color": color, "cornerradius": 4},
+            text=[f"{log[s[1]]:,}" for s in stages[k]],
+            textposition="outside",
             hovertemplate=f"Pattern {k}<br>" + "%{x}: %{y:,}<extra></extra>",
+            row=1,
+            col=j,
         )
-    return _layout(
-        fig, "Where the UUID is lost: failure stages (Patterns A and C)", barmode="group"
-    )
+    for a in fig.layout.annotations:
+        a.font = {"size": 13, "color": TEXT_2}
+    return _layout(fig, "Where the UUID is lost: failure stages (Patterns A and C)", height=420)
 
 
 def threshold_sweep(sweep: pd.DataFrame) -> go.Figure:
@@ -223,8 +221,8 @@ def threshold_sweep(sweep: pd.DataFrame) -> go.Figure:
 
 
 # ordinal blue ramp (light steps >= 250, dark steps <= 600) for assumed lags; longer = darker
-LAG_RAMP = ["#86b6ef", "#5598e7", "#1c5cab", "#184f95"]
-URBANICITY_COLOR = {"urban": LIGHT["blue"], "rural": LIGHT["orange"]}
+LAG_RAMP = ["#86b6ef", "#5598e7", "#256abf", "#184f95"]  # validated --ordinal, light and dark
+URBANICITY_COLOR = {"urban": LIGHT["violet"], "rural": LIGHT["yellow"]}  # validated pair
 
 
 def carry_gap_dumbbell(tbl: pd.DataFrame, summary: dict) -> go.Figure:

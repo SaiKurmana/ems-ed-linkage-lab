@@ -3,7 +3,7 @@
   const root = document.documentElement;
   try { const t = localStorage.getItem("theme"); if (t) root.setAttribute("data-theme", t); } catch (e) {}
   const DARK = {"#2a78d6": "#3987e5", "#eb6834": "#d95926", "#1baf7a": "#199e70", "#eda100": "#c98500",
-                "#e87ba4": "#d55181", "#008300": "#008300"};
+                "#e87ba4": "#d55181", "#008300": "#008300", "#6250d6": "#9085e9"};
   const LIGHT = Object.fromEntries(Object.entries(DARK).map(([k, v]) => [v, k]));
   function isDark() {
     const t = root.getAttribute("data-theme");

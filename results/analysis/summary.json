@@ -11,6 +11,14 @@
       "median_interval_min_rural": 73.8875,
       "median_interval_min_urban": 48.291667
     },
+    "hybrid_C": {
+      "alcohol_share_of_linked_fall": 0.052899,
+      "alcohol_share_of_linked_mvc": 0.18501,
+      "high_risk_triage_admit_transfer_or_died": 0.758304,
+      "high_risk_triage_n_linked": 1415,
+      "median_interval_min_rural": 73.55,
+      "median_interval_min_urban": 48.208333
+    },
     "splink_time": {
       "alcohol_share_of_linked_fall": 0.053408,
       "alcohol_share_of_linked_mvc": 0.185633,
@@ -30,6 +38,7 @@
   },
   "link_sources": {
     "det_C": "Deterministic UUID (Pattern C)",
+    "hybrid_C": "Hybrid (Pattern C UUID, then Splink)",
     "splink_time": "Probabilistic (Splink)",
     "truth": "Ground truth (simulation only)"
   },
