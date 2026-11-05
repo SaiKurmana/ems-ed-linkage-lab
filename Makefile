@@ -2,9 +2,9 @@
 PYTHON ?= python
 CONFIG ?= config/default.yaml
 
-.PHONY: all data simulate link analyze test lint site app clean install ci
+.PHONY: all data simulate link analyze sensitivity test lint site app clean install ci
 
-all: data simulate link analyze
+all: data simulate link analyze sensitivity
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -20,6 +20,9 @@ link:        ## deterministic UUID joins + Splink probabilistic linkage + evalua
 
 analyze:     ## example analyses that linkage makes possible (demonstrations, not findings)
 	$(PYTHON) -m analysis.run --config $(CONFIG)
+
+sensitivity: ## named sensitivity scenarios (e.g. rural/small-agency carry gap) vs baseline
+	$(PYTHON) -m sensitivity.run --config $(CONFIG)
 
 test:
 	$(PYTHON) -m pytest

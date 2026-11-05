@@ -25,6 +25,7 @@ LINK_SOURCES = {
     "truth": "Ground truth (simulation only)",
     "det_C": "Deterministic UUID (Pattern C)",
     "splink_time": "Probabilistic (Splink)",
+    "hybrid_C": "Hybrid (Pattern C UUID, then Splink)",
 }
 CONFOUNDING_NOTE = (
     "Descriptive only. Patients who arrive by EMS differ systematically from those who arrive "

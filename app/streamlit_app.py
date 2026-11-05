@@ -246,12 +246,52 @@ with tab3:
     dim = st.selectbox(
         "Subgroup dimension", list(charts.GROUP_LABEL), format_func=charts.GROUP_LABEL.get
     )
-    plot(charts.subgroup_dots(sub, dim))
+    compare = st.radio(
+        "Methods to compare",
+        ["Headline: UUID (C) · Splink · Hybrid", "Splink: arrival time vs date only"],
+        horizontal=True,
+    )
+    methods = (
+        charts.HEADLINE_METHODS
+        if compare.startswith("Headline")
+        else ("splink_time", "splink_date")
+    )
+    plot(charts.subgroup_dots(sub, dim, methods=methods))
     piv = sub[sub.dimension == dim].pivot_table(index="group", columns="method", values="recall")
     gap = (piv.max() - piv.min()).rename("max − min recall gap").to_frame().T
-    st.markdown("**Recall gap across groups (percentage points × 100)**")
+    st.markdown(
+        "**Recall gap across groups** (max − min recall, as a fraction; × 100 = percentage points)"
+    )
     st.dataframe(gap.style.format("{:.3f}"), width="stretch")
     st.dataframe(piv.style.format("{:.3f}"), width="stretch")
+
+    st.markdown("#### Does flat UUID recall survive non-random carry failures? (sensitivity)")
+    sens = json.loads((RESULTS / "sensitivity" / "summary.json").read_text(encoding="utf-8"))
+    sc = sens["scenarios"]["rural_small_agency_carry_gap"]
+    st.warning(f"**{sc['label']}.** {sc['assumption']}", icon="⚠️")
+    carry = load_csv("sensitivity/carry_by_urbanicity.csv")
+    plot(charts.carry_gap_dumbbell(carry, sens["scenarios"]))
+    gap_rows = [
+        {
+            "scenario": name,
+            "method": charts.METHOD_SHORT[m],
+            "urban": g["urban"],
+            "rural": g["rural"],
+            "urban − rural (pp)": g["urban_minus_rural_pp"],
+        }
+        for name, v in sens["scenarios"].items()
+        for m, g in v["recall"].items()
+    ]
+    st.dataframe(
+        pd.DataFrame(gap_rows).style.format(
+            {"urban": "{:.3f}", "rural": "{:.3f}", "urban − rural (pp)": "{:+.1f}"}
+        ),
+        hide_index=True,
+        width="stretch",
+    )
+    st.caption(
+        f"{DISCLAIMER} Baseline = main result; the scenario's rural rates are invented for illustration."
+    )
 
 # ----------------------------------------------------------------------------- tab 4
 with tab4:
@@ -267,13 +307,17 @@ with tab4:
         st.dataframe(df, hide_index=True, width="stretch")
         if qid == "q2_outcomes_by_arrival":
             st.caption("⚠️ " + summ["confounding_note"])
-    st.markdown("#### Data latency (assumption)")
-    st.caption(
-        "Deterministic links exist at the encounter; probabilistic linkage is modelled as an annual "
-        "batch run some months after the data year closes. Configurable in "
-        "`config/default.yaml → latency_assumptions`. This is an ASSUMPTION, not a measurement."
+    st.markdown(
+        "#### Data latency — illustrative, configurable assumption (12 / 18 / 24 / 36 months)"
     )
-    plot(charts.latency(load_csv("latency.csv")))
+    st.caption(
+        "Probabilistic links are assumed to become available in an annual batch N months after the "
+        "data year closes. No verified public source gives a typical end-to-end EMS–ED linkage lag; "
+        "for context, HCUP reports State databases are released typically beginning 9–12 months after "
+        "the calendar year (see docs/standards_references.md). Synthetic data — for demonstration only."
+    )
+    plot(charts.latency_sensitivity(load_csv("latency_sensitivity.csv")))
+    st.dataframe(load_csv("latency_sensitivity_summary.csv"), hide_index=True, width="stretch")
 
 st.divider()
 st.caption(f"{DISCLAIMER} {AFFILIATION}")

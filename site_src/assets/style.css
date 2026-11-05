@@ -90,3 +90,7 @@ footer.site p { margin: 6px 0; }
 ul.files { columns: 2 280px; padding-left: 18px; }
 @media (max-width: 640px) { .nav { gap: 10px; padding: 8px 0; } .nav a.link { font-size: 14px; } }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.syn { display: inline-block; font-size: 12px; font-weight: 600; color: var(--warn-ink); background: var(--warn-bg);
+  border: 1px solid var(--warn-border); border-radius: 999px; padding: 0 8px; vertical-align: middle; white-space: nowrap; }
+p.big { font-size: 34px; font-weight: 700; margin: 4px 0; color: var(--text); font-variant-numeric: tabular-nums; }
+p.cap { font-size: 13px; color: var(--text-2); margin: 16px 0 6px; }

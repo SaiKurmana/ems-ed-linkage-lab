@@ -1,4 +1,4 @@
-"""Run the whole pipeline (data -> simulate -> link -> analyze) into an isolated work directory.
+"""Run the whole pipeline (data -> simulate -> link -> analyze -> sensitivity) into an isolated work directory.
 
 Used by CI and tests:  python -m pipeline --config config/ci.yaml --workdir .ci_run
 """
@@ -12,6 +12,7 @@ from analysis import run as analysis_run
 from common.config import load_config
 from linkage import run as linkage_run
 from patterns import simulate
+from sensitivity import run as sensitivity_run
 from synth import generate
 
 
@@ -31,6 +32,7 @@ def run_all(config: str | None, workdir: str | Path, validate_all_fhir: bool = T
     simulate.save(cfg, simulate.simulate(cfg, validate_all_fhir=validate_all_fhir))
     linkage_run.save(cfg, linkage_run.run(cfg))
     analysis_run.save(cfg, analysis_run.run(cfg))
+    sensitivity_run.save(cfg, sensitivity_run.run(cfg))
     return cfg
 
 

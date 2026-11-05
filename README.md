@@ -13,6 +13,26 @@ fall injuries.**
 [![CI](https://github.com/saikurmana/ems-ed-linkage-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/saikurmana/ems-ed-linkage-lab/actions/workflows/ci.yml)
 · Site: <https://saikurmana.github.io/ems-ed-linkage-lab/> · App: `APP_URL` (placeholder — run locally with `make app`)
 
+## Practical takeaway
+
+**Carry the EMS UUID into the ED record, and keep probabilistic matching as a fallback.** In this
+simulation, joining on the UUID first and running Splink only on the records the UUID missed linked
+**99.1%** of true EMS→ED transports at **99.7%** precision *(synthetic data)* — more than the UUID alone
+(91.7%, Pattern C, *synthetic*) or probabilistic matching alone (88.9%, *synthetic*).
+
+Why not probabilistic matching alone? Because what it misses is not random:
+
+- **The most severely injured are the ones it misses.** For *critical* injuries, Splink linked
+  **31.2%** of transports vs **92.0%** for the UUID and **94.7%** for the hybrid *(synthetic data)* —
+  unidentified EMS patients and ED trauma aliases leave nothing to match on.
+- **That shifts the answers.** Among EMS patients with high-risk field-triage criteria, the share
+  admitted, transferred or died is **76.3%** with ground-truth links, **75.8%** with hybrid links,
+  **76.5%** with UUID links and **66.6%** with Splink links *(synthetic data; descriptive demonstration)*.
+
+And why not the UUID alone? Because integration loses some UUIDs — and if it loses them unevenly
+(e.g., rural / small agencies connected later), UUID-only recall becomes unequal too. See the
+[sensitivity check](#does-flat-recall-hold-sensitivity-check) below.
+
 ## The problem
 
 Injury information is split across systems. The EMS electronic patient care report (ePCR) knows the
@@ -27,7 +47,7 @@ or the traveler is unconscious and registered as "TRAUMA, ZULU". A carried UUID 
 
 ## What this demonstrates
 
-1. **A synthetic world** (`synth/`): 12,000 MVC and fall injury events → EMS ePCR records (UUID v4 per
+1. **A synthetic world** (`synth/`): 12,000 synthetic MVC and fall injury events → EMS ePCR records (UUID v4 per
    report, county-level location, times, vitals, NEMSIS-labelled trauma criteria and alcohol/drug
    indicators, procedures) → ED encounters (arrival lag, ICD-10-CM codes, disposition), including
    non-transported EMS calls and ED visits with no EMS record. Demographic errors (typos, name variants,
@@ -81,33 +101,79 @@ test), `make site` (builds `_site/` for GitHub Pages), `make ci` (small end-to-e
 Outputs are deterministic: fixed seed, sorted exports — re-running produces identical files
 (except `results/runtime.json`, which records wall-clock time).
 
-## Headline results (synthetic)
+## Deploying the app (Streamlit Community Cloud)
 
-7,738 true EMS→ED transport links; Splink match threshold 0.9; false-match rate = share of declared links that are wrong.
+The app reads only committed files (`results/`, `examples/`), so no pipeline run is needed at deploy time.
+
+- **Main file path:** `app/streamlit_app.py`
+- **Dependencies:** `requirements.txt` only. It pins `fhir.resources==6.1.0` together with
+  `pydantic==1.10.27` (pydantic must stay < 2 for that release).
+- **Python version:** choose **3.11** in the app's advanced settings, to match CI and the tested
+  environment.
+- After deploying, replace the `APP_URL` placeholder in `site_src/site.yaml` and in this README.
+
+## Results (synthetic data — for demonstration only)
+
+### All methods
+
+*Synthetic data — for demonstration only.* 7,738 true EMS→ED transport links; Splink match threshold 0.9;
+false-match rate = share of declared links that are wrong.
 
 | Method | Precision | Recall | F1 | False-match rate |
 |---|---:|---:|---:|---:|
+| Hybrid — Pattern C UUID first, then Splink (time) on the rest | 0.997 | 0.991 | 0.994 | 0.003 |
 | Deterministic UUID — Pattern A (HL7 v2 point-to-point) | 1.000 | 0.830 | 0.907 | 0.000 |
 | Deterministic UUID — Pattern B (HIE match + write-back) | 1.000 | 0.745 | 0.854 | 0.000 |
 | Deterministic UUID — Pattern C (FHIR API identifier) | 1.000 | 0.917 | 0.957 | 0.000 |
 | Probabilistic — Splink, name/DOB/sex/race/county + arrival time | 0.995 | 0.889 | 0.939 | 0.005 |
 | Probabilistic — Splink, name/DOB/sex/race/county + arrival date only | 0.993 | 0.881 | 0.934 | 0.007 |
-| Hybrid — Pattern C UUID first, then Splink (time) on the rest | 0.997 | 0.991 | 0.994 | 0.003 |
 
-What stands out (in this simulation):
+- **UUID joins are exact but only as complete as the integration** *(synthetic)*: recall equals the
+  configured carry rate (A: 0.92 × 0.97 × 0.93 ≈ 0.830; C: 0.95 × 0.985 × 0.98 ≈ 0.917) — a regression test checks it.
+- **Race/ethnicity gaps depend on the data available** *(synthetic)*: with minute-level arrival times,
+  Splink recall varied little by race/ethnicity (0.876–0.909); with dates only, Asian patients fell to
+  0.793 vs 0.886 for White patients.
 
-- **UUID joins are exact but only as complete as the integration.** Recall equals the configured
-  carry rate (A: 0.92 × 0.97 × 0.93 ≈ 0.830; C: 0.95 × 0.985 × 0.98 ≈ 0.917) — a regression test checks it.
-- **Probabilistic matching misses the sickest patients.** Splink recall for *critical* injuries is
-  **0.312** vs **0.920** for the Pattern C UUID: unidentified EMS patients and ED trauma aliases leave
-  nothing to match on.
-- **Missed links bias estimates.** Among EMS patients with high-risk field-triage criteria, the share
-  admitted/transferred/died is 76.3% (ground truth), 76.5% (UUID links) and 66.6% (Splink links).
-- **Race/ethnicity gaps depend on the data available.** With minute-level arrival times, Splink recall
-  varied little by race/ethnicity (0.876–0.909); with dates only, Asian patients fell to 0.793 vs 0.886 for White patients.
-- **Best together:** UUID first + Splink on the remainder reached recall 0.991.
-- **Latency (assumption):** UUID links are available at the encounter; probabilistic links are
-  modelled as an annual batch 18 months after the data year closes.
+### Does flat recall hold? (sensitivity check)
+
+The main result assumes UUID carry fails **at random**. The named scenario
+`rural_small_agency_carry_gap` instead assumes — as an **invented, configurable assumption** — that
+agencies in rural counties (standing in for small agencies) are less often connected and have less
+reliable interfaces (`config/default.yaml → sensitivity`, run with `make sensitivity`).
+
+*Synthetic data — for demonstration only.* Recall by the EMS agency's urbanicity:
+
+| Method | Baseline urban | Baseline rural | Scenario urban | Scenario rural | Scenario gap (pp) |
+|---|---:|---:|---:|---:|---:|
+| Hybrid (C + Splink) | 0.992 | 0.990 | 0.990 | 0.963 | +2.7 |
+| UUID · A (HL7 v2) | 0.828 | 0.834 | 0.830 | 0.532 | +29.8 |
+| UUID · B (HIE) | 0.745 | 0.745 | 0.750 | 0.625 | +12.5 |
+| UUID · C (FHIR) | 0.916 | 0.918 | 0.917 | 0.666 | +25.0 |
+| Splink (time) | 0.889 | 0.889 | 0.889 | 0.889 | -0.1 |
+
+- **Baseline:** recall is flat by urbanicity for every method (gaps ≤ 0.6 pp, *synthetic*) — but only because carry failures were random by construction.
+- **Scenario:** UUID-only recall opens a 25–30 pp rural gap for Patterns A and C *(synthetic)*; the
+  hybrid narrows it to 2.7 pp because probabilistic matching backfills the rural records the UUID missed.
+  Splink alone is unaffected by carry failures.
+
+### Latency (illustrative assumption)
+
+UUID links exist at the encounter. Probabilistic linkage is modelled as an **annual batch N months
+after the data year closes** — default N = 18, shown with a 12 / 18 / 24 / 36-month sensitivity range.
+No verified public source states a typical end-to-end EMS–ED linkage lag, so N is an assumption. For
+context, HCUP reports its State databases are released "typically beginning 9 to 12 months following
+the end of a calendar year" ([HCUP FAQ](https://hcup-us.ahrq.gov/tech_assist/faq.jsp); more in
+[standards references](docs/standards_references.md#data-release-timing-context-for-latency-assumptions)).
+
+*Synthetic data — for demonstration only.* Share of true links usable for analysis, by months since the encounter:
+
+| Method (assumed lag) | 6 mo | 12 mo | 18 mo | 24 mo | 36 mo | 48 mo |
+|---|---:|---:|---:|---:|---:|---:|
+| UUID · Pattern C (at the encounter) | 91.7% | 91.7% | 91.7% | 91.7% | 91.7% | 91.7% |
+| Splink, batch 12 mo after year end | 0.0% | 0.2% | 43.4% | 88.9% | 88.9% | 88.9% |
+| Splink, batch 18 mo after year end (default) | 0.0% | 0.0% | 0.5% | 44.0% | 88.9% | 88.9% |
+| Splink, batch 24 mo after year end | 0.0% | 0.0% | 0.0% | 0.2% | 88.9% | 88.9% |
+| Splink, batch 36 mo after year end | 0.0% | 0.0% | 0.0% | 0.0% | 0.2% | 88.9% |
 
 Full outputs: [`results/`](results/) · interactive: `make app`.
 

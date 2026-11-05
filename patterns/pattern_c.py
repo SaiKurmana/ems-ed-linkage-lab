@@ -22,7 +22,12 @@ import pandas as pd
 from fhir.resources.bundle import Bundle
 
 from common import EMS_UUID_SYSTEM, HOSPITAL_MRN_SYSTEM_TMPL, HOSPITAL_VISIT_SYSTEM_TMPL
-from patterns.common import expected_carry_rate, stage
+from patterns.common import (
+    agency_strata,
+    expected_carry_rate,
+    stage_by_stratum,
+    stratum_rate,
+)
 from synth.codes import ALL_ICD10CM, dotted
 
 STAGES = ["api_enabled", "api_call_success", "identifier_retained"]
@@ -287,14 +292,19 @@ def run(
     ed_rows = {r.ed_encounter_id: r for r in ed.itertuples(index=False)}
     log = {"n_transported": len(ids)}
 
-    enabled, _ = stage(rng, ids, pc["api_enabled"])
-    success, _ = stage(rng, enabled, pc["api_call_success"])
+    strata = agency_strata(ems, cfg)
+    enabled, _ = stage_by_stratum(rng, ids, pc["api_enabled"], "api_enabled", pc, strata)
+    success, _ = stage_by_stratum(
+        rng, enabled, pc["api_call_success"], "api_call_success", pc, strata
+    )
     n_txn_validated = 0
     for u in success:  # each successful call carries a valid transaction Bundle
         b = validate(transaction_bundle(ed_rows[link_map[u]], u))
         assert ems_uuid_from_bundle(b) == u
         n_txn_validated += 1
-    retained, _ = stage(rng, success, pc["identifier_retained"])
+    retained, _ = stage_by_stratum(
+        rng, success, pc["identifier_retained"], "identifier_retained", pc, strata
+    )
     log.update(
         {
             "api_enabled": len(enabled),
@@ -318,6 +328,9 @@ def run(
     log["ed_record_bundles_validated"] = n_valid
     log["ed_records_with_uuid"] = int(ed_out.ems_uuid.notna().sum())
     log["expected_carry_rate"] = expected_carry_rate([pc[s] for s in STAGES])
+    log["expected_carry_rate_by_agency_urbanicity"] = {
+        u: expected_carry_rate([stratum_rate(pc, u, s) for s in STAGES]) for u in ("rural", "urban")
+    }
     log["observed_carry_rate"] = len(retained) / max(1, len(ids))
 
     examples = []

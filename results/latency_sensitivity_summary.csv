@@ -1,0 +1,6 @@
+data_label,method,probabilistic_lag_months_after_year_end,earliest_month_available,latest_month_available,share_available_at_6_months,share_available_at_12_months,share_available_at_18_months,share_available_at_24_months,share_available_at_36_months,share_available_at_48_months
+Synthetic data — for demonstration only.,det_C,,,,0.917033,0.917033,0.917033,0.917033,0.917033,0.917033
+Synthetic data — for demonstration only.,splink_time,12,12,24,0,0.00168002,0.433704,0.888989,0.888989,0.888989
+Synthetic data — for demonstration only.,splink_time,18,18,30,0,0,0.00452313,0.439648,0.888989,0.888989
+Synthetic data — for demonstration only.,splink_time,24,24,36,0,0,0,0.00168002,0.888989,0.888989
+Synthetic data — for demonstration only.,splink_time,36,36,48,0,0,0,0,0.00168002,0.888989

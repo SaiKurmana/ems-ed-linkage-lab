@@ -114,6 +114,8 @@ patterns:
     api_call_success: 0.985       # POST/PUT succeeds (after retries)
     identifier_retained: 0.98     # EHR keeps the extra Encounter.identifier on later updates
   n_examples: 3                   # example messages / bundles written per pattern
+  # Baseline: no stratum overrides (carry failures are random with respect to patient and agency).
+  # Sensitivity scenarios below set per-stratum pass rates via `stratum_overrides`.
 
 linkage:
   splink:
@@ -123,7 +125,37 @@ linkage:
     threshold_sweep: [0.5, 0.7, 0.8, 0.9, 0.95, 0.99]
 
 latency_assumptions:
-  # ASSUMPTIONS, clearly labeled: when is a linked record available for analysis?
+  # ILLUSTRATIVE, CONFIGURABLE ASSUMPTIONS — not measurements of any program.
+  # When is a linked record available for analysis?
   deterministic_days: 0                 # UUID present at the encounter (patterns A and C)
   hie_hours: 12                         # bounded by HIE match window (pattern B)
-  probabilistic_months_after_year_end: 18   # annual batch linkage after data year closes
+  probabilistic_months_after_year_end: 18   # default: annual batch linkage after the data year closes
+  probabilistic_lag_sensitivity_months: [12, 18, 24, 36]   # sensitivity range shown in results
+  # Context (verified, see docs/standards_references.md): these are SOURCE-DATA release timings,
+  # not end-to-end linkage lags. HCUP State databases are released "typically beginning 9 to 12
+  # months" and nationwide databases "approximately 18 to 22 months" after the calendar year ends;
+  # the NEMSIS annual research dataset for 2024 was announced in June 2025.
+
+# ---------------------------------------------------------------------------------------------
+# Named SENSITIVITY scenarios. The main results use the baseline above (random carry failures).
+# Each scenario is a set of config overrides; `make sensitivity` re-runs the patterns and the
+# deterministic/hybrid linkage under each one and reports recall by urbanicity.
+sensitivity:
+  scenarios:
+    rural_small_agency_carry_gap:
+      label: "Sensitivity: UUID carry fails more often for rural / small agencies"
+      assumption: >-
+        ASSUMPTION for illustration only: agencies in rural counties (the simulation's stand-in
+        for small agencies) are less often connected and have less reliable interfaces. Urban
+        agencies keep the baseline rates. Rates are invented, not estimates.
+      overrides:
+        patterns:
+          A_point_to_point:
+            stratum_overrides:
+              rural: {interface_live: 0.65, message_delivered: 0.93, registration_merge: 0.88}
+          B_hie:
+            stratum_overrides:
+              rural: {ems_adt_sent: 0.80, writeback_success: 0.95}
+          C_fhir_api:
+            stratum_overrides:
+              rural: {api_enabled: 0.70, api_call_success: 0.97}
