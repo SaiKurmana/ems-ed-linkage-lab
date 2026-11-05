@@ -1,0 +1,41 @@
+{
+  "disclaimer": "Synthetic data — for demonstration only.",
+  "patterns": {
+    "A": {
+      "ed_records_with_uuid": 6422,
+      "expected_carry_rate": 0.829932,
+      "interface_live": 7119,
+      "message_delivered": 6905,
+      "n_transported": 7738,
+      "observed_carry_rate": 0.82993,
+      "registration_merge": 6422
+    },
+    "B": {
+      "ambiguous_no_match": 0,
+      "ed_adt_sent": 9117,
+      "ed_records_with_uuid": 5765,
+      "ems_adt_sent": 8993,
+      "ems_delay_hours_median": 1.492044,
+      "ems_delay_share_over_window": 0.062604,
+      "hie_matches": 5943,
+      "late_ems_messages_blocking_match": 264,
+      "n_ed_records": 9209,
+      "n_ems_records": 9567,
+      "observed_carry_rate": 0.745025,
+      "writeback_correct": 5765,
+      "writeback_success": 5765,
+      "writeback_wrong_uuid": 0
+    },
+    "C": {
+      "api_call_success": 7241,
+      "api_enabled": 7351,
+      "ed_record_bundles_validated": 9209,
+      "ed_records_with_uuid": 7096,
+      "expected_carry_rate": 0.917035,
+      "identifier_retained": 7096,
+      "n_transported": 7738,
+      "observed_carry_rate": 0.917033,
+      "transaction_bundles_validated": 7241
+    }
+  }
+}
