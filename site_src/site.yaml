@@ -1,6 +1,7 @@
-# Static site settings. Replace APP_URL after deploying the Streamlit app
-# (e.g. on Streamlit Community Cloud). Until then the site shows run-locally instructions.
-app_url: "APP_URL"
+# Static site settings.
+# Hosted Streamlit app (Streamlit Community Cloud). Linked from the landing-page button,
+# the "Explore it" card and every page footer. Must be an https:// URL.
+app_url: "https://ems-ed-linkage.streamlit.app/"
 repo_url: "https://github.com/saikurmana/ems-ed-linkage-lab"
 site_title: "EMS–ED Linkage Lab"
 author: "Sai Kurmana, MPH, MS, CPHIMS"
